@@ -1,19 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using Cake.Core;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="CakeReportPrinter.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// </copyright>
+// -----------------------------------------------------------------------
 namespace Cake
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
+
+    using Cake.Core;
+
     internal sealed class CakeReportPrinter : ICakeReportPrinter
     {
+        #region Fields
+
+        /// <summary>_console</summary>
         private readonly IConsole _console;
+
+        #endregion Fields
+
+        #region Constructors
 
         public CakeReportPrinter(IConsole console)
         {
             _console = console;
         }
+
+        #endregion Constructors
+
+        #region Methods
 
         public void Write(CakeReport report)
         {
@@ -57,5 +74,7 @@ namespace Cake
             return entries.Select(i => i.Duration)
                 .Aggregate(TimeSpan.Zero, (t1, t2) => t1 + t2);
         }
+
+        #endregion Methods
     }
 }

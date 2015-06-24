@@ -1,81 +1,88 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Cake.Common.IO.Paths;
-using Cake.Common.Solution.Project.Properties;
-using Cake.Common.Tools.MSBuild;
-using Cake.Common.Tools.NuGet.Pack;
-using Cake.Common.Tools.NuGet.Push;
-using Cake.Common.Tools.NuGet.Restore;
-using Cake.Common.Tools.XUnit;
-using Cake.Core;
-using Cake.Core.IO;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="CakeBuild.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// </copyright>
+// -----------------------------------------------------------------------
 namespace Cake.Tin
 {
-  using Cake.Common;
-  using Cake.Common.Diagnostics;
-  using Cake.Common.IO;
-  using Cake.Common.Tools.NuGet;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-  /// <summary>
-  /// Cake tin build script for Cake
-  /// </summary>
-  internal class CakeBuild : CakeTinBase
-  {
+    using Cake.Common;
+    using Cake.Common.Diagnostics;
+    using Cake.Common.IO;
+    using Cake.Common.IO.Paths;
+    using Cake.Common.Solution.Project.Properties;
+    using Cake.Common.Tools.MSBuild;
+    using Cake.Common.Tools.NuGet;
+    using Cake.Common.Tools.NuGet.Pack;
+    using Cake.Common.Tools.NuGet.Push;
+    using Cake.Common.Tools.NuGet.Restore;
+    using Cake.Common.Tools.XUnit;
+    using Cake.Core;
+    using Cake.Core.IO;
+
     /// <summary>
-    /// Kicks off the actual build in the inherited class.
+    /// Cake tin build script for Cake
     /// </summary>
-    protected override void RunBuild()
+    internal class CakeBuild : CakeTinBase
     {
-      //////////////////////////////////////////////////////////////////////
-      // ARGUMENTS
-      //////////////////////////////////////////////////////////////////////
+        #region Methods
 
-      var target = Argument("target", "Default");
-      var configuration = Argument("configuration", "Release");
+        /// <summary>
+        /// Kicks off the actual build in the inherited class.
+        /// </summary>
+        protected override void RunBuild()
+        {
+            //////////////////////////////////////////////////////////////////////
+              // ARGUMENTS
+              //////////////////////////////////////////////////////////////////////
 
-      //////////////////////////////////////////////////////////////////////
-      // PREPARATION
-      //////////////////////////////////////////////////////////////////////
+              var target = Argument("target", "Default");
+              var configuration = Argument("configuration", "Release");
 
-      // Get whether or not this is a local build.
-      var local = BuildSystem.IsLocalBuild;
-      var isRunningOnAppVeyor = AppVeyor.IsRunningOnAppVeyor;
-      var isPullRequest = AppVeyor.Environment.PullRequest.IsPullRequest;
+              //////////////////////////////////////////////////////////////////////
+              // PREPARATION
+              //////////////////////////////////////////////////////////////////////
 
-      // Parse release notes.
-      var releaseNotes = this.ParseReleaseNotes("./ReleaseNotes.md");
+              // Get whether or not this is a local build.
+              var local = BuildSystem.IsLocalBuild;
+              var isRunningOnAppVeyor = AppVeyor.IsRunningOnAppVeyor;
+              var isPullRequest = AppVeyor.Environment.PullRequest.IsPullRequest;
 
-      // Get version.
-      var buildNumber = AppVeyor.Environment.Build.Number;
-      var version = releaseNotes.Version.ToString();
-      var semVersion = local ? version : (version + string.Concat("-build-", buildNumber));
+              // Parse release notes.
+              var releaseNotes = this.ParseReleaseNotes("./ReleaseNotes.md");
 
-      // Define directories.
-      var buildDir = this.Directory("./src/Cake/bin") + this.Directory(configuration);
-      var buildResultDir = this.Directory("./build") + this.Directory("v" + semVersion);
-      var testResultsDir = buildResultDir + this.Directory("test-results");
-      var nugetRoot = buildResultDir + this.Directory("nuget");
-      var binDir = buildResultDir + this.Directory("bin");
+              // Get version.
+              var buildNumber = AppVeyor.Environment.Build.Number;
+              var version = releaseNotes.Version.ToString();
+              var semVersion = local ? version : (version + string.Concat("-build-", buildNumber));
 
-      ///////////////////////////////////////////////////////////////////////////////
-      // SETUP / TEARDOWN
-      ///////////////////////////////////////////////////////////////////////////////
+              // Define directories.
+              var buildDir = this.Directory("./src/Cake/bin") + this.Directory(configuration);
+              var buildResultDir = this.Directory("./build") + this.Directory("v" + semVersion);
+              var testResultsDir = buildResultDir + this.Directory("test-results");
+              var nugetRoot = buildResultDir + this.Directory("nuget");
+              var binDir = buildResultDir + this.Directory("bin");
 
-      Setup(() => this.Information("Building version {0} of Cake.", semVersion));
+              ///////////////////////////////////////////////////////////////////////////////
+              // SETUP / TEARDOWN
+              ///////////////////////////////////////////////////////////////////////////////
 
-      //////////////////////////////////////////////////////////////////////
-      // TASKS
-      //////////////////////////////////////////////////////////////////////
-      CakeTask x = new CleanTask("Clean", buildResultDir, binDir, testResultsDir, nugetRoot);
-      Task(x);
-      Task("Clean")
-          .Does(() => this.CleanDirectories(new string[] { buildResultDir, binDir, testResultsDir, nugetRoot }));
+              Setup(() => this.Information("Building version {0} of Cake.", semVersion));
 
-      Task("Restore-NuGet-Packages")
-          .IsDependentOn("Clean")
-          .Does(
+              //////////////////////////////////////////////////////////////////////
+              // TASKS
+              //////////////////////////////////////////////////////////////////////
+              CakeTask x = new CleanTask("Clean", buildResultDir, binDir, testResultsDir, nugetRoot);
+              Task(x);
+              Task("Clean")
+              .Does(() => this.CleanDirectories(new string[] { buildResultDir, binDir, testResultsDir, nugetRoot }));
+
+              Task("Restore-NuGet-Packages")
+              .IsDependentOn("Clean")
+              .Does(
               () =>
               this.NuGetRestore(
                   "./src/Cake.sln",
@@ -89,9 +96,9 @@ namespace Cake.Tin
                                         }
                       }));
 
-      Task("Patch-Assembly-Info").IsDependentOn("Restore-NuGet-Packages").Does(
-          () =>
-          {
+              Task("Patch-Assembly-Info").IsDependentOn("Restore-NuGet-Packages").Does(
+              () =>
+              {
             const string File = "./src/SolutionInfo.cs";
             this.CreateAssemblyInfo(
                 File,
@@ -104,11 +111,11 @@ namespace Cake.Tin
                       Copyright =
                           "Copyright (c) Patrik Svensson, Mattias Karlsson and contributors"
                     });
-          });
+              });
 
-      Task("Build")
-          .IsDependentOn("Patch-Assembly-Info")
-          .Does(
+              Task("Build")
+              .IsDependentOn("Patch-Assembly-Info")
+              .Does(
               () => this.MSBuild(
                   "./src/Cake.sln",
                   settings =>
@@ -117,9 +124,9 @@ namespace Cake.Tin
                       .UseToolVersion(MSBuildToolVersion.NET45)
                       .SetNodeReuse(false)));
 
-      Task("Run-Unit-Tests")
-          .IsDependentOn("Build")
-          .Does(
+              Task("Run-Unit-Tests")
+              .IsDependentOn("Build")
+              .Does(
               () => this.XUnit2(
                   "./src/**/bin/" + configuration + "/*.Tests.dll",
                   new XUnit2Settings
@@ -128,9 +135,9 @@ namespace Cake.Tin
                         XmlReportV1 = true
                       }));
 
-      Task("Copy-Files").IsDependentOn("Run-Unit-Tests").Does(
-          () =>
-          {
+              Task("Copy-Files").IsDependentOn("Run-Unit-Tests").Does(
+              () =>
+              {
             this.CopyFileToDirectory(buildDir + this.File("Cake.exe"), binDir);
             this.CopyFileToDirectory(buildDir + this.File("Cake.Core.dll"), binDir);
             this.CopyFileToDirectory(buildDir + this.File("Cake.Core.xml"), binDir);
@@ -141,20 +148,20 @@ namespace Cake.Tin
             this.CopyFileToDirectory(buildDir + this.File("Nuget.Core.dll"), binDir);
 
             this.CopyFiles(new FilePath[] { "LICENSE", "README.md", "ReleaseNotes.md" }, binDir);
-          });
+              });
 
-      Task("Zip-Files").IsDependentOn("Copy-Files").Does(
-          () =>
-          {
+              Task("Zip-Files").IsDependentOn("Copy-Files").Does(
+              () =>
+              {
             var packageFile = this.File("Cake-bin-v" + semVersion + ".zip");
             var packagePath = buildResultDir + packageFile;
 
             this.Zip(binDir, packagePath);
-          });
+              });
 
-      Task("Create-NuGet-Packages").IsDependentOn("Copy-Files").Does(
-          () =>
-          {
+              Task("Create-NuGet-Packages").IsDependentOn("Copy-Files").Does(
+              () =>
+              {
             // Create Cake package.
             this.NuGetPack(
                 "./nuspec/Cake.nuspec",
@@ -179,25 +186,25 @@ namespace Cake.Tin
                       OutputDirectory = nugetRoot,
                       Symbols = false
                     });
-          });
+              });
 
-      //Task("Update-AppVeyor-Build-Number")
-      //    .WithCriteria(() => isRunningOnAppVeyor)
-      //    .Does(() => this.AppVeyor.UpdateBuildVersion(semVersion));
+              //Task("Update-AppVeyor-Build-Number")
+              //    .WithCriteria(() => isRunningOnAppVeyor)
+              //    .Does(() => this.AppVeyor.UpdateBuildVersion(semVersion));
 
-      Task("Upload-AppVeyor-Artifacts")
-          .IsDependentOn("Package")
-          .WithCriteria(() => isRunningOnAppVeyor)
-          .Does(
+              Task("Upload-AppVeyor-Artifacts")
+              .IsDependentOn("Package")
+              .WithCriteria(() => isRunningOnAppVeyor)
+              .Does(
               () =>
               {
                 var artifact = buildResultDir + this.File("Cake-bin-v" + semVersion + ".zip");
                 AppVeyor.UploadArtifact(artifact);
               });
 
-      Task("Publish-MyGet").WithCriteria(() => !local).WithCriteria(() => !isPullRequest).Does(
-          () =>
-          {
+              Task("Publish-MyGet").WithCriteria(() => !local).WithCriteria(() => !isPullRequest).Does(
+              () =>
+              {
             // Resolve the API key.
             var apiKey = this.EnvironmentVariable("MYGET_API_KEY");
             if (string.IsNullOrEmpty(apiKey))
@@ -216,43 +223,57 @@ namespace Cake.Tin
                       Source = "https://www.myget.org/F/cake/api/v2/package",
                       ApiKey = apiKey
                     });
-          });
+              });
 
-      //////////////////////////////////////////////////////////////////////
-      // TASK TARGETS
-      //////////////////////////////////////////////////////////////////////
+              //////////////////////////////////////////////////////////////////////
+              // TASK TARGETS
+              //////////////////////////////////////////////////////////////////////
 
-      Task("Package").IsDependentOn("Zip-Files").IsDependentOn("Create-NuGet-Packages");
+              Task("Package").IsDependentOn("Zip-Files").IsDependentOn("Create-NuGet-Packages");
 
-      Task("Default").IsDependentOn("Package");
+              Task("Default").IsDependentOn("Package");
 
-      Task("AppVeyor")
-          .IsDependentOn("Update-AppVeyor-Build-Number")
-          .IsDependentOn("Upload-AppVeyor-Artifacts")
-          .IsDependentOn("Publish-MyGet");
+              Task("AppVeyor")
+              .IsDependentOn("Update-AppVeyor-Build-Number")
+              .IsDependentOn("Upload-AppVeyor-Artifacts")
+              .IsDependentOn("Publish-MyGet");
 
-      //////////////////////////////////////////////////////////////////////
-      // EXECUTION
-      //////////////////////////////////////////////////////////////////////
+              //////////////////////////////////////////////////////////////////////
+              // EXECUTION
+              //////////////////////////////////////////////////////////////////////
 
-      RunTarget(target);
+              RunTarget(target);
+        }
+
+        #endregion Methods
     }
-  }
 
-  internal class CleanTask : CakeTask
-  {
-    private readonly ConvertableDirectoryPath[] pathsToClean;
-
-    public CleanTask(string name, params ConvertableDirectoryPath[] pathsToClean)
-      : base(name)
+    internal class CleanTask : CakeTask
     {
-      this.pathsToClean = pathsToClean;
-    }
+        #region Fields
 
-    public override void Execute(ICakeContext context)
-    {
-      context.CleanDirectories(this.pathsToClean.Select(p => p.Path));
-    }
-  }
+        /// <summary>Paths to clean</summary>
+        private readonly ConvertableDirectoryPath[] pathsToClean;
 
+        #endregion Fields
+
+        #region Constructors
+
+        public CleanTask(string name, params ConvertableDirectoryPath[] pathsToClean)
+            : base(name)
+        {
+            this.pathsToClean = pathsToClean;
+        }
+
+        #endregion Constructors
+
+        #region Methods
+
+        public override void Execute(ICakeContext context)
+        {
+            context.CleanDirectories(this.pathsToClean.Select(p => p.Path));
+        }
+
+        #endregion Methods
+    }
 }

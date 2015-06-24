@@ -1,23 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using Cake.Core;
-using Cake.Core.Diagnostics;
-using Cake.Core.IO;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="ArgumentParser.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// </copyright>
+// -----------------------------------------------------------------------
 namespace Cake.Arguments
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Linq;
+
+    using Cake.Core;
+    using Cake.Core.Diagnostics;
+    using Cake.Core.IO;
+
     internal sealed class ArgumentParser : IArgumentParser
     {
-        private readonly ICakeLog _log;
+        #region Fields
+
+        /// <summary>_default script name conventions</summary>
+        private readonly string[] _defaultScriptNameConventions = 
+        {
+            "build.cake",
+            "default.cake",
+            "bake.cake",
+            ".cakefile"
+        };
+
+        /// <summary>_file system</summary>
         private readonly IFileSystem _fileSystem;
+
+        /// <summary>_log</summary>
+        private readonly ICakeLog _log;
+
+        #endregion Fields
+
+        #region Constructors
 
         public ArgumentParser(ICakeLog log, IFileSystem fileSystem)
         {
             _log = log;
             _fileSystem = fileSystem;
         }
+
+        #endregion Constructors
+
+        #region Methods
 
         public CakeOptions Parse(IEnumerable<string> args)
         {
@@ -96,6 +124,24 @@ namespace Cake.Arguments
             return arg[0] == '-';
         }
 
+        private FilePath GetDefaultScript()
+        {
+            _log.Verbose("Searching for default build script...");
+
+            // Search for default cake scripts in order
+            foreach (var defaultScriptNameConvention in _defaultScriptNameConventions)
+            {
+                var currentFile = new FilePath(defaultScriptNameConvention);
+                var file = _fileSystem.GetFile(currentFile);
+                if (file != null && file.Exists)
+                {
+                    _log.Verbose("Found default build script: {0}", defaultScriptNameConvention);
+                    return currentFile;
+                }
+            }
+            return null;
+        }
+
         private bool ParseOption(string arg, CakeOptions options)
         {
             string name, value;
@@ -133,8 +179,8 @@ namespace Cake.Arguments
                 var verbosity = converter.ConvertFromInvariantString(value);
                 if (verbosity != null)
                 {
-                    options.Verbosity = (Verbosity)verbosity;   
-                }                    
+                    options.Verbosity = (Verbosity)verbosity;
+                }
             }
 
             if (name.Equals("showdescription", StringComparison.OrdinalIgnoreCase) ||
@@ -172,30 +218,6 @@ namespace Cake.Arguments
             return true;
         }
 
-        private readonly string[] _defaultScriptNameConventions =
-        {
-            "build.cake",
-            "default.cake",
-            "bake.cake",
-            ".cakefile"
-        };
-
-        private FilePath GetDefaultScript()
-        {
-            _log.Verbose("Searching for default build script...");
-
-            // Search for default cake scripts in order
-            foreach (var defaultScriptNameConvention in _defaultScriptNameConventions)
-            {
-                var currentFile = new FilePath(defaultScriptNameConvention);
-                var file = _fileSystem.GetFile(currentFile);
-                if (file != null && file.Exists)
-                {
-                    _log.Verbose("Found default build script: {0}", defaultScriptNameConvention);
-                    return currentFile;
-                }
-            }
-            return null;
-        }
+        #endregion Methods
     }
 }

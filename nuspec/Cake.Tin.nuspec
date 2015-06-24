@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>Cake.Tin</id>
+    <version>0.0.0</version>
+    <authors>Mark Walker</authors>
+    <owners>Mark Walker</owners>
+    <description>The Cake.Tin wrapper around Cake.</description>
+    <summary>Provides a wrapper around Cake (C# Make) which is a build automation system. Cake.Tin allows the build "script" to be a normal Visual Studio solution.</summary>
+    <licenseUrl>https://github.com/CakeTin/Cake.Tin/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/CakeTin/Cake.Tin/</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/cake-build/graphics/master/png/cake-medium.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <copyright>Copyright (c) Mark Walker. Requires Cake which Copyright (c) is Patrik Svensson, Mattias Karlsson and contributors</copyright>
+    <tags>Cake Script Build</tags>
+  </metadata>
+  <files>
+    <file src="Cake.Tin.exe" />
+    <file src="Cake.exe" />
+    <file src="Cake.Core.dll" />
+    <file src="Cake.Core.xml" />
+    <file src="Cake.Common.dll" />
+    <file src="Cake.Common.xml" />
+    <file src="NuGet.Core.dll" />
+    <file src="Autofac.dll" />
+    <file src="LICENSE" />
+  </files>
+</package>

@@ -1,12 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using Cake.Core;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="CakeArguments.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// </copyright>
+// -----------------------------------------------------------------------
 namespace Cake
 {
+    using System;
+    using System.Collections.Generic;
+
+    using Cake.Core;
+
     internal sealed class CakeArguments : ICakeArguments
     {
+        #region Fields
+
+        /// <summary>_arguments</summary>
         private readonly Dictionary<string, string> _arguments;
+
+        #endregion Fields
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CakeArguments"/> class.
+        /// </summary>
+        public CakeArguments()
+        {
+            _arguments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        #endregion Constructors
+
+        #region Properties
 
         /// <summary>
         /// Gets the arguments.
@@ -17,12 +42,31 @@ namespace Cake
             get { return _arguments; }
         }
 
+        #endregion Properties
+
+        #region Methods
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="CakeArguments"/> class.
+        /// Gets an argument.
         /// </summary>
-        public CakeArguments()
+        /// <param name="name">The argument name.</param>
+        /// <returns>The argument value.</returns>
+        public string GetArgument(string name)
         {
-            _arguments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            return _arguments.ContainsKey(name)
+                ? _arguments[name] : null;
+        }
+
+        /// <summary>
+        /// Determines whether or not the specified argument exist.
+        /// </summary>
+        /// <param name="name">The argument name.</param>
+        /// <returns>
+        ///   <c>true</c> if the argument exist; otherwise <c>false</c>.
+        /// </returns>
+        public bool HasArgument(string name)
+        {
+            return _arguments.ContainsKey(name);
         }
 
         /// <summary>
@@ -42,27 +86,6 @@ namespace Cake
             }
         }
 
-        /// <summary>
-        /// Determines whether or not the specified argument exist.
-        /// </summary>
-        /// <param name="name">The argument name.</param>
-        /// <returns>
-        ///   <c>true</c> if the argument exist; otherwise <c>false</c>.
-        /// </returns>
-        public bool HasArgument(string name)
-        {
-            return _arguments.ContainsKey(name);
-        }
-
-        /// <summary>
-        /// Gets an argument.
-        /// </summary>
-        /// <param name="name">The argument name.</param>
-        /// <returns>The argument value.</returns>
-        public string GetArgument(string name)
-        {
-            return _arguments.ContainsKey(name)
-                ? _arguments[name] : null;
-        }
+        #endregion Methods
     }
 }

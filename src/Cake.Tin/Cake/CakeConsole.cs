@@ -1,10 +1,28 @@
-﻿using System;
-using Cake.Core;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="CakeConsole.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// </copyright>
+// -----------------------------------------------------------------------
 namespace Cake
 {
+    using System;
+
+    using Cake.Core;
+
     internal sealed class CakeConsole : IConsole
     {
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the background color.
+        /// </summary>
+        /// <value>The background color.</value>
+        public ConsoleColor BackgroundColor
+        {
+            get { return Console.BackgroundColor; }
+            set { Console.BackgroundColor = value; }
+        }
+
         /// <summary>
         /// Gets or sets the foreground color.
         /// </summary>
@@ -15,14 +33,16 @@ namespace Cake
             set { Console.ForegroundColor = value; }
         }
 
+        #endregion Properties
+
+        #region Methods
+
         /// <summary>
-        /// Gets or sets the background color.
+        /// Sets the foreground and background console colors to their defaults.
         /// </summary>
-        /// <value>The background color.</value>
-        public ConsoleColor BackgroundColor
+        public void ResetColor()
         {
-            get { return Console.BackgroundColor; }
-            set { Console.BackgroundColor = value; }
+            Console.ResetColor();
         }
 
         /// <summary>
@@ -50,12 +70,6 @@ namespace Cake
             System.Diagnostics.Debug.Write(string.Format(format, arg));
         }
 
-        /// <summary>
-        /// Sets the foreground and background console colors to their defaults.
-        /// </summary>
-        public void ResetColor()
-        {
-            Console.ResetColor();
-        }
+        #endregion Methods
     }
 }

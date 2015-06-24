@@ -1,14 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="FormatParser.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// </copyright>
+// -----------------------------------------------------------------------
 namespace Cake.Diagnostics.Formatting
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+
     internal static class FormatParser
     {
+        #region Methods
+
         public static IEnumerable<FormatToken> Parse(string format)
         {
             var reader = new StringReader(format);
@@ -31,9 +38,25 @@ namespace Cake.Diagnostics.Formatting
             }
         }
 
+        private static bool IsNumeric(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+            foreach (var character in value)
+            {
+                if (!char.IsDigit(character))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private static FormatToken ParseProperty(TextReader reader)
         {
-            reader.Read(); // Consume          
+            reader.Read(); // Consume
             if (reader.Peek() == -1)
             {
                 return new LiteralToken("{");
@@ -107,20 +130,6 @@ namespace Cake.Diagnostics.Formatting
             return new LiteralToken(builder.ToString());
         }
 
-        private static bool IsNumeric(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return false;
-            }
-            foreach (var character in value)
-            {
-                if (!char.IsDigit(character))
-                {
-                    return false;   
-                }                    
-            }
-            return true;
-        }
+        #endregion Methods
     }
 }

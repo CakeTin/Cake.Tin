@@ -1,25 +1,34 @@
-﻿using System;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="Program.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// </copyright>
+// -----------------------------------------------------------------------
 namespace Cake.Tin
 {
-  public class Program
-  {
-    public static void Main(string[] args)
+    using System;
+
+    public class Program
     {
-      if (args != null)
-      {
-        using (var build = new GenericBuild())
+        #region Methods
+
+        public static void Main(string[] args)
         {
-          Environment.ExitCode = build.Execute() ? 0 : 1;
+            if (args != null)
+              {
+            using (var build = new GenericBuild())
+            {
+              Environment.ExitCode = build.Execute() ? 0 : 1;
+            }
+              }
+              else
+              {
+            using (var build = new CakeBuild())
+            {
+              Environment.ExitCode = build.Execute() ? 0 : 1;
+            }
+              }
         }
-      }
-      else
-      {
-        using (var build = new CakeBuild())
-        {
-          Environment.ExitCode = build.Execute() ? 0 : 1;
-        }
-      }
+
+        #endregion Methods
     }
-  }
 }

@@ -1,23 +1,44 @@
-﻿using System;
-using Cake.Core;
-using Cake.Core.Diagnostics;
-
+﻿// -----------------------------------------------------------------------
+// <copyright file="HelpCommand.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// </copyright>
+// -----------------------------------------------------------------------
 namespace Cake.Commands
 {
+    using System;
+
+    using Cake.Core;
+    using Cake.Core.Diagnostics;
+
     /// <summary>
     /// A command that displays help information.
     /// </summary>
     internal sealed class HelpCommand : ICommand
     {
+        #region Fields
+
+        /// <summary>_console</summary>
         private readonly IConsole _console;
 
-        // Delegate factory used by Autofac.
-        public delegate HelpCommand Factory();
+        #endregion Fields
+
+        #region Constructors
 
         public HelpCommand(IConsole console)
         {
             _console = console;
         }
+
+        #endregion Constructors
+
+        #region Delegates
+
+        // Delegate factory used by Autofac.
+        public delegate HelpCommand Factory();
+
+        #endregion Delegates
+
+        #region Methods
 
         public bool Execute(CakeOptions options)
         {
@@ -42,5 +63,7 @@ namespace Cake.Commands
 
             return true;
         }
+
+        #endregion Methods
     }
 }
