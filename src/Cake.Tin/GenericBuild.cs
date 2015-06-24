@@ -23,7 +23,7 @@ namespace Cake.Tin
         /// <summary>
         /// Kicks off the actual build in the inherited class.
         /// </summary>
-        protected override void RunBuild()
+        protected internal override void RunBuild()
         {
             ///////////////////////////////////////////////////////////////////////////////
               // ARGUMENTS

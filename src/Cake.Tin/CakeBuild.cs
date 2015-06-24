@@ -33,7 +33,7 @@ namespace Cake.Tin
         /// <summary>
         /// Kicks off the actual build in the inherited class.
         /// </summary>
-        protected override void RunBuild()
+        protected internal override void RunBuild()
         {
             //////////////////////////////////////////////////////////////////////
               // ARGUMENTS
@@ -75,8 +75,6 @@ namespace Cake.Tin
               //////////////////////////////////////////////////////////////////////
               // TASKS
               //////////////////////////////////////////////////////////////////////
-              CakeTask x = new CleanTask("Clean", buildResultDir, binDir, testResultsDir, nugetRoot);
-              Task(x);
               Task("Clean")
               .Does(() => this.CleanDirectories(new string[] { buildResultDir, binDir, testResultsDir, nugetRoot }));
 

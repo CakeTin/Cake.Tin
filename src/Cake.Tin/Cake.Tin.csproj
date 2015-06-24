@@ -73,11 +73,12 @@
     <Compile Include="Cake\Diagnostics\Formatting\FormatToken.cs" />
     <Compile Include="Cake\Diagnostics\Formatting\LiteralToken.cs" />
     <Compile Include="Cake\Diagnostics\Formatting\PropertyToken.cs" />
+    <Compile Include="Commands\TinBuildCommand.cs" />
+    <Compile Include="Commands\VersionCommand.cs" />
     <Compile Include="Enums\ArgumentOptions.cs" />
     <Compile Include="GenericBuild.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Cake\Commands\VersionCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\ReleaseNotes.md">

@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="CakeTinBase.cs" company="Patrik Svensson and contributors.">
-//     Copyright (c) 2014, Patrik Svensson and contributors.
+// <copyright file="CakeTinBase.cs" company="Mark Walker and contributors.">
+//         Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
 // </copyright>
 // -----------------------------------------------------------------------
 namespace Cake.Tin
@@ -26,6 +26,7 @@ namespace Cake.Tin
     using Cake.Core.Scripting;
     using Cake.Diagnostics;
     using Cake.Scripting;
+    using Cake.Tin.Commands;
     using Cake.Tin.Enums;
 
     using IContainer = Autofac.IContainer;
@@ -62,16 +63,16 @@ namespace Cake.Tin
         protected CakeTinBase(IContainer container)
         {
             this.Container = container ?? CreateContainer();
-              this.SetProperties(
-              this.Container.Resolve<IFileSystem>(),
-              this.Container.Resolve<ICakeEnvironment>(),
-              this.Container.Resolve<IGlobber>(),
-              this.Container.Resolve<ICakeLog>(),
-              this.Container.Resolve<ICakeArguments>(),
-              this.Container.Resolve<IProcessRunner>(),
-              this.Container.Resolve<IEnumerable<IToolResolver>>(),
-              this.Container.Resolve<IRegistry>());
-              this.ArgOptions = ArgumentOptions.CommandLine;
+            this.SetProperties(
+                this.Container.Resolve<IFileSystem>(),
+                this.Container.Resolve<ICakeEnvironment>(),
+                this.Container.Resolve<IGlobber>(),
+                this.Container.Resolve<ICakeLog>(),
+                this.Container.Resolve<ICakeArguments>(),
+                this.Container.Resolve<IProcessRunner>(),
+                this.Container.Resolve<IEnumerable<IToolResolver>>(),
+                this.Container.Resolve<IRegistry>());
+            this.ArgOptions = ArgumentOptions.CommandLine;
         }
 
         /// <summary>
@@ -86,17 +87,17 @@ namespace Cake.Tin
         /// <param name="toolResolvers">The tool resolvers.</param>
         /// <param name="registry">The registry.</param>
         protected CakeTinBase(
-            IFileSystem fileSystem,
-            ICakeEnvironment environment,
-            IGlobber globber,
-            ICakeLog log,
-            ICakeArguments arguments,
-            IProcessRunner processRunner,
-            IEnumerable<IToolResolver> toolResolvers,
-            IRegistry registry)
+                IFileSystem fileSystem,
+                ICakeEnvironment environment,
+                IGlobber globber,
+                ICakeLog log,
+                ICakeArguments arguments,
+                IProcessRunner processRunner,
+                IEnumerable<IToolResolver> toolResolvers,
+                IRegistry registry)
         {
             this.SetProperties(fileSystem, environment, globber, log, arguments, processRunner, toolResolvers, registry);
-              this.ArgOptions = ArgumentOptions.CommandLine;
+            this.ArgOptions = ArgumentOptions.CommandLine;
         }
 
         #endregion Constructors
@@ -149,9 +150,9 @@ namespace Cake.Tin
         protected IAppVeyorProvider AppVeyor
         {
             get
-              {
-            return this.AppVeyor();
-              }
+            {
+                return this.AppVeyor();
+            }
         }
 
         /// <summary>
@@ -191,38 +192,36 @@ namespace Cake.Tin
         public bool Execute()
         {
             try
-              {
-            // Parse options.
-            var argumentParser = Container.Resolve<IArgumentParser>();
-            var options = argumentParser.Parse(System.Environment.GetCommandLineArgs());
-            if (options != null)
             {
-              var log = this.Log as IVerbosityAwareLog;
-              if (log != null)
-              {
-            log.SetVerbosity(options.Verbosity);
-              }
+                // Parse options.
+                var argumentParser = Container.Resolve<IArgumentParser>();
+                var options = argumentParser.Parse(System.Environment.GetCommandLineArgs());
+                if (options != null)
+                {
+                    var log = this.Log as IVerbosityAwareLog;
+                    if (log != null)
+                    {
+                        log.SetVerbosity(options.Verbosity);
+                    }
 
-              // Create the correct command and execute it.
-              var command = CreateCommand(options);
-              command.Execute(options);
-              this.RunBuild();
-              return true;
+                    // Create the correct command and execute it.
+                    var command = CreateCommand(options);
+                    return command.Execute(options);
+                }
             }
-              }
-              catch (Exception ex)
-              {
-            if (this.Log.Verbosity == Verbosity.Diagnostic)
+            catch (Exception ex)
             {
-              this.Log.Error("Error: {0}", ex);
+                if (this.Log.Verbosity == Verbosity.Diagnostic)
+                {
+                    this.Log.Error("Error: {0}", ex);
+                }
+                else
+                {
+                    this.Log.Error("Error: {0}", ex.Message);
+                }
             }
-            else
-            {
-              this.Log.Error("Error: {0}", ex.Message);
-            }
-              }
 
-              return false;
+            return false;
         }
 
         /// <summary>
@@ -235,11 +234,11 @@ namespace Cake.Tin
         public IToolResolver GetToolResolver(string toolName)
         {
             var toolResolver = this.toolResolverLookup[toolName].FirstOrDefault();
-              if (toolResolver == null)
-              {
-            throw new CakeException(string.Format(CultureInfo.InvariantCulture, "Failed to resolve tool: {0}", toolName));
-              }
-              return toolResolver;
+            if (toolResolver == null)
+            {
+                throw new CakeException(string.Format(CultureInfo.InvariantCulture, "Failed to resolve tool: {0}", toolName));
+            }
+            return toolResolver;
         }
 
         /// <summary>
@@ -253,26 +252,26 @@ namespace Cake.Tin
         {
             string value = null;
 
-              if ((this.ArgOptions & ArgumentOptions.CommandLine) == ArgumentOptions.CommandLine)
-              {
-            value = this.Arguments.GetArgument(name);
-              }
+            if ((this.ArgOptions & ArgumentOptions.CommandLine) == ArgumentOptions.CommandLine)
+            {
+                value = this.Arguments.GetArgument(name);
+            }
 
-              if (value == null
-              && (this.ArgOptions & ArgumentOptions.EnvironmentalVariables) == ArgumentOptions.EnvironmentalVariables)
-              {
-            value = this.EnvironmentVariable(name);
-              }
+            if (value == null
+            && (this.ArgOptions & ArgumentOptions.EnvironmentalVariables) == ArgumentOptions.EnvironmentalVariables)
+            {
+                value = this.EnvironmentVariable(name);
+            }
 
-              return value == null
-            ? defaultValue
-            : Convert<TReturn>(value);
+            return value == null
+        ? defaultValue
+        : Convert<TReturn>(value);
         }
 
         /// <summary>
         /// Kicks off the actual build in the inherited class.
         /// </summary>
-        protected abstract void RunBuild();
+        protected internal abstract void RunBuild();
 
         /// <summary>
         /// Runs the specified target.
@@ -291,12 +290,6 @@ namespace Cake.Tin
         protected void Setup(Action action)
         {
             this.buildScriptHost.Setup(action);
-        }
-
-        protected CakeTaskBuilder<ActionTask> Task(CakeTask task)
-        {
-            return Task(task.Name)
-              .Does(task.Execute);
         }
 
         /// <summary>
@@ -328,7 +321,7 @@ namespace Cake.Tin
         private static TReturn Convert<TReturn>(string value)
         {
             var converter = TypeDescriptor.GetConverter(typeof(TReturn));
-              return (TReturn)converter.ConvertFromInvariantString(value);
+            return (TReturn)converter.ConvertFromInvariantString(value);
         }
 
         /// <summary>
@@ -339,47 +332,47 @@ namespace Cake.Tin
         {
             var builder = new ContainerBuilder();
 
-              // Core services.
-              builder.RegisterType<CakeEngine>().As<ICakeEngine>().SingleInstance();
-              builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
-              builder.RegisterType<CakeEnvironment>().As<ICakeEnvironment>().SingleInstance();
-              builder.RegisterType<CakeArguments>().As<ICakeArguments>().SingleInstance();
-              builder.RegisterType<Globber>().As<IGlobber>().SingleInstance();
-              builder.RegisterType<ProcessRunner>().As<IProcessRunner>().SingleInstance();
-              builder.RegisterType<ScriptAliasFinder>().As<IScriptAliasFinder>().SingleInstance();
-              builder.RegisterType<CakeReportPrinter>().As<ICakeReportPrinter>().SingleInstance();
-              builder.RegisterType<CakeConsole>().As<IConsole>().SingleInstance();
-              builder.RegisterType<ScriptProcessor>().As<IScriptProcessor>().SingleInstance();
-              builder.RegisterCollection<IToolResolver>("toolResolvers").As<IEnumerable<IToolResolver>>();
-              builder.RegisterType<NuGetToolResolver>().As<IToolResolver>().As<INuGetToolResolver>().SingleInstance().MemberOf("toolResolvers");
-              builder.RegisterType<WindowsRegistry>().As<IRegistry>().SingleInstance();
-              builder.RegisterType<CakeContext>().As<ICakeContext>().SingleInstance();
+            // Core services.
+            builder.RegisterType<CakeEngine>().As<ICakeEngine>().SingleInstance();
+            builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
+            builder.RegisterType<CakeEnvironment>().As<ICakeEnvironment>().SingleInstance();
+            builder.RegisterType<CakeArguments>().As<ICakeArguments>().SingleInstance();
+            builder.RegisterType<Globber>().As<IGlobber>().SingleInstance();
+            builder.RegisterType<ProcessRunner>().As<IProcessRunner>().SingleInstance();
+            builder.RegisterType<ScriptAliasFinder>().As<IScriptAliasFinder>().SingleInstance();
+            builder.RegisterType<CakeReportPrinter>().As<ICakeReportPrinter>().SingleInstance();
+            builder.RegisterType<CakeConsole>().As<IConsole>().SingleInstance();
+            builder.RegisterType<ScriptProcessor>().As<IScriptProcessor>().SingleInstance();
+            builder.RegisterCollection<IToolResolver>("toolResolvers").As<IEnumerable<IToolResolver>>();
+            builder.RegisterType<NuGetToolResolver>().As<IToolResolver>().As<INuGetToolResolver>().SingleInstance().MemberOf("toolResolvers");
+            builder.RegisterType<WindowsRegistry>().As<IRegistry>().SingleInstance();
+            builder.RegisterType<CakeContext>().As<ICakeContext>().SingleInstance();
 
-              ////// Roslyn related services.
-              ////builder.RegisterType<RoslynScriptEngine>().As<IScriptEngine>().SingleInstance();
-              ////builder.RegisterType<RoslynScriptSessionFactory>().SingleInstance();
-              ////builder.RegisterType<RoslynNightlyScriptSessionFactory>().SingleInstance();
+            ////// Roslyn related services.
+            ////builder.RegisterType<RoslynScriptEngine>().As<IScriptEngine>().SingleInstance();
+            ////builder.RegisterType<RoslynScriptSessionFactory>().SingleInstance();
+            ////builder.RegisterType<RoslynNightlyScriptSessionFactory>().SingleInstance();
 
-              // Cake services.
-              builder.RegisterType<ArgumentParser>().As<IArgumentParser>().SingleInstance();
-              builder.RegisterType<CommandFactory>().As<ICommandFactory>().SingleInstance();
-              //builder.RegisterType<CakeApplication>().SingleInstance();
-              builder.RegisterType<ScriptRunner>().As<IScriptRunner>().SingleInstance();
-              builder.RegisterType<CakeBuildLog>().As<ICakeLog>().As<IVerbosityAwareLog>().SingleInstance();
+            // Cake services.
+            builder.RegisterType<ArgumentParser>().As<IArgumentParser>().SingleInstance();
+            builder.RegisterType<CommandFactory>().As<ICommandFactory>().SingleInstance();
+            //builder.RegisterType<CakeApplication>().SingleInstance();
+            builder.RegisterType<ScriptRunner>().As<IScriptRunner>().SingleInstance();
+            builder.RegisterType<CakeBuildLog>().As<ICakeLog>().As<IVerbosityAwareLog>().SingleInstance();
 
-              // Register script hosts.
-              builder.RegisterType<BuildScriptHost>().SingleInstance();
-              builder.RegisterType<DescriptionScriptHost>().SingleInstance();
-              builder.RegisterType<DryRunScriptHost>().SingleInstance();
+            // Register script hosts.
+            builder.RegisterType<BuildScriptHost>().SingleInstance();
+            builder.RegisterType<DescriptionScriptHost>().SingleInstance();
+            builder.RegisterType<DryRunScriptHost>().SingleInstance();
 
-              // Register commands.
-              builder.RegisterType<BuildCommand>().AsSelf().InstancePerDependency();
-              builder.RegisterType<DescriptionCommand>().AsSelf().InstancePerDependency();
-              builder.RegisterType<DryRunCommand>().AsSelf().InstancePerDependency();
-              builder.RegisterType<HelpCommand>().AsSelf().InstancePerDependency();
-              builder.RegisterType<VersionCommand>().AsSelf().InstancePerDependency();
+            // Register commands.
+            builder.RegisterType<BuildCommand>().AsSelf().InstancePerDependency();
+            builder.RegisterType<DescriptionCommand>().AsSelf().InstancePerDependency();
+            builder.RegisterType<DryRunCommand>().AsSelf().InstancePerDependency();
+            builder.RegisterType<HelpCommand>().AsSelf().InstancePerDependency();
+            builder.RegisterType<VersionCommand>().AsSelf().InstancePerDependency();
 
-              return builder.Build();
+            return builder.Build();
         }
 
         /// <summary>
@@ -390,92 +383,92 @@ namespace Cake.Tin
         private ICommand CreateCommand(CakeOptions options)
         {
             var commandFactory = this.Container.Resolve<ICommandFactory>();
-              if (options != null)
-              {
-            if (options.ShowHelp)
+            if (options != null)
             {
-              return commandFactory.CreateHelpCommand();
+                if (options.ShowHelp)
+                {
+                    return commandFactory.CreateHelpCommand();
+                }
+
+                if (options.ShowVersion)
+                {
+                    return commandFactory.CreateVersionCommand();
+                }
+
+                if (options.Script != null)
+                {
+                    if (options.PerformDryRun)
+                    {
+                        return commandFactory.CreateDryRunCommand();
+                    }
+
+                    if (options.ShowDescription)
+                    {
+                        return commandFactory.CreateDescriptionCommand();
+                    }
+
+                    return new TinBuildCommand(this);
+                }
             }
 
-            if (options.ShowVersion)
-            {
-              return commandFactory.CreateVersionCommand();
-            }
+            this.Log.Error("Could not find a build script to execute.");
+            this.Log.Error("Either the first argument must the build script's path,");
+            this.Log.Error("or build script should follow default script name conventions.");
 
-            if (options.Script != null)
-            {
-              if (options.PerformDryRun)
-              {
-            return commandFactory.CreateDryRunCommand();
-              }
-
-              if (options.ShowDescription)
-              {
-            return commandFactory.CreateDescriptionCommand();
-              }
-
-              return commandFactory.CreateBuildCommand();
-            }
-              }
-
-              this.Log.Error("Could not find a build script to execute.");
-              this.Log.Error("Either the first argument must the build script's path,");
-              this.Log.Error("or build script should follow default script name conventions.");
-
-              return new ErrorCommandDecorator(commandFactory.CreateHelpCommand());
+            return new ErrorCommandDecorator(commandFactory.CreateHelpCommand());
         }
 
         private void SetProperties(
-            IFileSystem fileSystem,
-            ICakeEnvironment environment,
-            IGlobber globber,
-            ICakeLog log,
-            ICakeArguments arguments,
-            IProcessRunner processRunner,
-            IEnumerable<IToolResolver> toolResolvers,
-            IRegistry registry)
+                IFileSystem fileSystem,
+                ICakeEnvironment environment,
+                IGlobber globber,
+                ICakeLog log,
+                ICakeArguments arguments,
+                IProcessRunner processRunner,
+                IEnumerable<IToolResolver> toolResolvers,
+                IRegistry registry)
         {
             if (fileSystem == null)
-              {
-            throw new ArgumentNullException("fileSystem");
-              }
-              if (environment == null)
-              {
-            throw new ArgumentNullException("environment");
-              }
-              if (globber == null)
-              {
-            throw new ArgumentNullException("globber");
-              }
-              if (log == null)
-              {
-            throw new ArgumentNullException("log");
-              }
-              if (arguments == null)
-              {
-            throw new ArgumentNullException("arguments");
-              }
-              if (processRunner == null)
-              {
-            throw new ArgumentNullException("processRunner");
-              }
-              if (toolResolvers == null)
-              {
-            throw new ArgumentNullException("toolResolvers");
-              }
+            {
+                throw new ArgumentNullException("fileSystem");
+            }
+            if (environment == null)
+            {
+                throw new ArgumentNullException("environment");
+            }
+            if (globber == null)
+            {
+                throw new ArgumentNullException("globber");
+            }
+            if (log == null)
+            {
+                throw new ArgumentNullException("log");
+            }
+            if (arguments == null)
+            {
+                throw new ArgumentNullException("arguments");
+            }
+            if (processRunner == null)
+            {
+                throw new ArgumentNullException("processRunner");
+            }
+            if (toolResolvers == null)
+            {
+                throw new ArgumentNullException("toolResolvers");
+            }
 
-              this.FileSystem = fileSystem;
-              this.Environment = environment;
-              this.Globber = globber;
-              this.Log = log;
-              this.Arguments = arguments;
-              this.ProcessRunner = processRunner;
+            this.FileSystem = fileSystem;
+            this.Environment = environment;
+            this.Globber = globber;
+            this.Log = log;
+            this.Arguments = arguments;
+            this.ProcessRunner = processRunner;
 
-              // Create the tool resolver lookup table.
-              this.toolResolverLookup = toolResolvers.ToLookup(key => key.Name, value => value, StringComparer.OrdinalIgnoreCase);
+            // Create the tool resolver lookup table.
+            this.toolResolverLookup = toolResolvers.ToLookup(key => key.Name, value => value, StringComparer.OrdinalIgnoreCase);
 
-              this.Registry = registry;
-              this.buildScriptHost = new BuildScriptHost(this.Container.Resolve<ICakeEngine>(), this, this.Container.Resolve<ICakeReportPrinter>(), this.Log);
+            this.Registry = registry;
+            this.buildScriptHost = new BuildScriptHost(this.Container.Resolve<ICakeEngine>(), this, this.Container.Resolve<ICakeReportPrinter>(), this.Log);
         }
 
         #endregion Methods
