@@ -170,7 +170,7 @@ Task("Publish-MyGet")
 
     // Push the package.
     NuGetPush(package, new NuGetPushSettings {
-        Source = "https://www.myget.org/F/Cake.Tin/api/v2/package",
+        Source = "https://www.myget.org/F/caketin/api/v2/package",
         ApiKey = apiKey
     });
 });
