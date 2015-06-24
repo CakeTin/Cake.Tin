@@ -53,6 +53,11 @@ if($WhatIf.IsPresent) {
     $UseDryRun = "-dryrun"
 }
 
+# Make sure tools folder exists
+if ((Test-Path $PSScriptRoot) -and !(Test-Path $TOOLS_DIR)) {
+    New-Item -path $TOOLS_DIR -name logfiles -itemtype directory
+}
+
 # Try find NuGet.exe in path if not exists
 if (!(Test-Path $NUGET_EXE)) {
     "Trying to find nuget.exe in path"
