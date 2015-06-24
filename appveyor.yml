@@ -10,8 +10,8 @@ build_script:
 test: off
 
 # Branches to build
-branches:
-  # Whitelist
-  only:
-    - develop
-    - main
+#branches:
+#  # Whitelist
+#  only:
+#    - develop
+#    - master
