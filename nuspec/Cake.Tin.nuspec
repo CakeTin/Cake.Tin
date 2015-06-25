@@ -13,11 +13,11 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <copyright>Copyright (c) Mark Walker. Requires Cake which is Copyright (c) Patrik Svensson, Mattias Karlsson and contributors</copyright>
     <tags>Cake Script Build</tags>
-    <references>
+   <!-- <references>
       <reference file="Cake.Core.dll" />
       <reference file="Cake.Common.dll" />
       <reference file="Cake.Tin.dll" />
-    </references>
+    </references> -->
   </metadata>
   <files>
     <file src="Cake.exe" />
