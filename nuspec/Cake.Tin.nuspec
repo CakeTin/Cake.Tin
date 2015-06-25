@@ -13,16 +13,21 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <copyright>Copyright (c) Mark Walker. Requires Cake which is Copyright (c) Patrik Svensson, Mattias Karlsson and contributors</copyright>
     <tags>Cake Script Build</tags>
+    <references>
+      <reference file="Cake.Core.dll" />
+      <reference file="Cake.Common.dll" />
+      <reference file="Cake.Tin.dll" />
+    </references>
   </metadata>
   <files>
-    <file src="Cake.exe" target="lib" />
-    <file src="Cake.Core.dll" target="lib" />
-    <file src="Cake.Core.xml" target="lib" />
-    <file src="Cake.Common.dll" target="lib" />
-    <file src="Cake.Common.xml" target="lib" />
-    <file src="Cake.Tin.dll" target="lib" />
-    <file src="NuGet.Core.dll" target="lib" />
-    <file src="Autofac.dll" target="lib" />
-    <file src="LICENSE" target="lib" />
+    <file src="Cake.exe" />
+    <file src="Cake.Core.dll" />
+    <file src="Cake.Core.xml" />
+    <file src="Cake.Common.dll" />
+    <file src="Cake.Common.xml" />
+    <file src="Cake.Tin.dll" />
+    <file src="NuGet.Core.dll" />
+    <file src="Autofac.dll" />
+    <file src="LICENSE" />
   </files>
 </package>
