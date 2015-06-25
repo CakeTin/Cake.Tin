@@ -13,7 +13,6 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <copyright>Copyright (c) Mark Walker. Requires Cake which is Copyright (c) Patrik Svensson, Mattias Karlsson and contributors</copyright>
     <tags>Cake Script Build</tags>
-	<reference
   </metadata>
   <files>
     <file src="Cake.exe" target="lib" />
