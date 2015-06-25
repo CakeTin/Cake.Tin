@@ -101,7 +101,7 @@ Task("Copy-Files")
     .IsDependentOn("Run-Unit-Tests")
     .Does(() =>
 {
-    CopyFileToDirectory(buildDir + File("Cake.Tin.exe"), binDir);
+    CopyFileToDirectory(buildDir + File("Cake.Tin.dll"), binDir);
     CopyFileToDirectory(buildDir + File("Cake.exe"), binDir);
     CopyFileToDirectory(buildDir + File("Cake.Core.dll"), binDir);
     CopyFileToDirectory(buildDir + File("Cake.Core.xml"), binDir);
