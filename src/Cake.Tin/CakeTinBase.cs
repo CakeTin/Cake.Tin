@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="CakeTinBase.cs" company="Mark Walker and contributors.">
-//         Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
+// <copyright file="CakeTinBase.cs" company="Mark Walker">
+//     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
 // </copyright>
 // -----------------------------------------------------------------------
 namespace Cake.Tin
@@ -87,14 +87,14 @@ namespace Cake.Tin
         /// <param name="toolResolvers">The tool resolvers.</param>
         /// <param name="registry">The registry.</param>
         protected CakeTinBase(
-                IFileSystem fileSystem,
-                ICakeEnvironment environment,
-                IGlobber globber,
-                ICakeLog log,
-                ICakeArguments arguments,
-                IProcessRunner processRunner,
-                IEnumerable<IToolResolver> toolResolvers,
-                IRegistry registry)
+            IFileSystem fileSystem,
+            ICakeEnvironment environment,
+            IGlobber globber,
+            ICakeLog log,
+            ICakeArguments arguments,
+            IProcessRunner processRunner,
+            IEnumerable<IToolResolver> toolResolvers,
+            IRegistry registry)
         {
             this.SetProperties(fileSystem, environment, globber, log, arguments, processRunner, toolResolvers, registry);
             this.ArgOptions = ArgumentOptions.CommandLine;
@@ -242,6 +242,11 @@ namespace Cake.Tin
         }
 
         /// <summary>
+        /// Creates and executes the build.
+        /// </summary>
+        protected internal abstract void CreateAndExecuteBuild();
+
+        /// <summary>
         /// Arguments the specified name.
         /// </summary>
         /// <typeparam name="TReturn">The type of the return object.</typeparam>
@@ -264,14 +269,9 @@ namespace Cake.Tin
             }
 
             return value == null
-        ? defaultValue
-        : Convert<TReturn>(value);
+            ? defaultValue
+            : Convert<TReturn>(value);
         }
-
-        /// <summary>
-        /// Creates and executes the build.
-        /// </summary>
-        protected internal abstract void CreateAndExecuteBuild();
 
         /// <summary>
         /// Runs the specified target.
@@ -419,14 +419,14 @@ namespace Cake.Tin
         }
 
         private void SetProperties(
-                IFileSystem fileSystem,
-                ICakeEnvironment environment,
-                IGlobber globber,
-                ICakeLog log,
-                ICakeArguments arguments,
-                IProcessRunner processRunner,
-                IEnumerable<IToolResolver> toolResolvers,
-                IRegistry registry)
+            IFileSystem fileSystem,
+            ICakeEnvironment environment,
+            IGlobber globber,
+            ICakeLog log,
+            ICakeArguments arguments,
+            IProcessRunner processRunner,
+            IEnumerable<IToolResolver> toolResolvers,
+            IRegistry registry)
         {
             if (fileSystem == null)
             {
