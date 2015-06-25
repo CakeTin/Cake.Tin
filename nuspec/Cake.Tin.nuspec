@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Cake.Tin</id>
-    <version>0.0.0</version>
+    <version>0.0.1</version>
     <authors>Mark Walker</authors>
     <owners>Mark Walker</owners>
     <description>The Cake.Tin wrapper around Cake.</description>
@@ -11,18 +11,19 @@
     <projectUrl>https://github.com/CakeTin/Cake.Tin/</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/cake-build/graphics/master/png/cake-medium.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <copyright>Copyright (c) Mark Walker. Requires Cake which Copyright (c) is Patrik Svensson, Mattias Karlsson and contributors</copyright>
+    <copyright>Copyright (c) Mark Walker. Requires Cake which is Copyright (c) Patrik Svensson, Mattias Karlsson and contributors</copyright>
     <tags>Cake Script Build</tags>
+	<reference
   </metadata>
   <files>
-    <file src="Cake.Tin.exe" />
-    <file src="Cake.exe" />
-    <file src="Cake.Core.dll" />
-    <file src="Cake.Core.xml" />
-    <file src="Cake.Common.dll" />
-    <file src="Cake.Common.xml" />
-    <file src="NuGet.Core.dll" />
-    <file src="Autofac.dll" />
-    <file src="LICENSE" />
+    <file src="Cake.exe" target="lib" />
+    <file src="Cake.Core.dll" target="lib" />
+    <file src="Cake.Core.xml" target="lib" />
+    <file src="Cake.Common.dll" target="lib" />
+    <file src="Cake.Common.xml" target="lib" />
+    <file src="Cake.Tin.dll" target="lib" />
+    <file src="NuGet.Core.dll" target="lib" />
+    <file src="Autofac.dll" target="lib" />
+    <file src="LICENSE" target="lib" />
   </files>
 </package>

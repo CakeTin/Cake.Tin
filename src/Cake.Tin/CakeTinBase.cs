@@ -269,9 +269,9 @@ namespace Cake.Tin
         }
 
         /// <summary>
-        /// Kicks off the actual build in the inherited class.
+        /// Creates and executes the build.
         /// </summary>
-        protected internal abstract void RunBuild();
+        protected internal abstract void CreateAndExecuteBuild();
 
         /// <summary>
         /// Runs the specified target.

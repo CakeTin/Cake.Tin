@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{5E7AB980-CC5C-4002-A5DF-BE9E32D273AE}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Cake.Tin</RootNamespace>
     <AssemblyName>Cake.Tin</AssemblyName>
@@ -31,18 +31,24 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Cake">
+    <Reference Include="Cake, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Cake.0.4.2\Cake.exe</HintPath>
     </Reference>
-    <Reference Include="Cake.Common">
+    <Reference Include="Cake.Common, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Cake.0.4.2\Cake.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Cake.Core">
+    <Reference Include="Cake.Core, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Cake.0.4.2\Cake.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -54,7 +60,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CakeBuild.cs" />
     <Compile Include="CakeTinBase.cs" />
     <Compile Include="CakeTinOptions.cs" />
     <Compile Include="Cake\Arguments\ArgumentParser.cs" />
@@ -76,8 +81,6 @@
     <Compile Include="Commands\TinBuildCommand.cs" />
     <Compile Include="Commands\VersionCommand.cs" />
     <Compile Include="Enums\ArgumentOptions.cs" />
-    <Compile Include="GenericBuild.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

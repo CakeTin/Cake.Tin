@@ -13,7 +13,7 @@ namespace Cake.Tin.Commands
 
     public bool Execute(CakeOptions options)
     {
-      this.cakeTinBase.RunBuild();
+      this.cakeTinBase.CreateAndExecuteBuild();
       return true;
     }
   }
