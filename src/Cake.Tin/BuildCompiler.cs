@@ -6,10 +6,13 @@
 namespace Cake.Tin
 {
     using System;
+    using System.Linq;
 
     using Cake.Common.Tools.MSBuild;
     using Cake.Common.Tools.NuGet;
-    
+    using Cake.Core;
+    using Cake.Core.Diagnostics;
+
     /// <summary>
     /// Class designed to be called from PowerShell to compile the build
     /// </summary>
@@ -21,19 +24,44 @@ namespace Cake.Tin
         /// Compiles the specified solution filename.
         /// </summary>
         /// <param name="solutionFilename">The solution filename.</param>
+        /// <param name="arguments">Arguments to pass to build</param>
         /// <returns>"Success" if build succeeded; otherwise error message </returns>
-        public static string Compile(string solutionFilename)
+        public static string Compile(string solutionFilename, params string[] arguments)
         {
+            ////System.Diagnostics.Debugger.Launch();
+            Builder builder = null;
+            string message = "Build failed.";
             try
             {
-                var builder = new Builder(solutionFilename);
-                builder.Execute();
-                return "Success";
+                if (arguments == null || !arguments.Any())
+                {
+                    arguments = new[]
+                            {
+                                "-target=Default",
+                                "-configuration=Release",
+                                "-verbosity=Normal"
+                            };
+                }
+
+                builder = new Builder(solutionFilename);
+                if (builder.Execute(arguments))
+                {
+                    message = "Success";
+                }
             }
             catch (Exception ex)
             {
-                return ex.ToString();
+                if (builder == null)
+                {
+                    message = ex.ToString();
+                }
+                else
+                {
+                    builder.Log.Error("Error: {0}", ex);
+                }
             }
+
+            return message;
         }
 
         #endregion Methods
@@ -72,8 +100,18 @@ namespace Cake.Tin
             /// </summary>
             protected internal override void CreateAndExecuteBuild()
             {
-                this.NuGetRestore(this.solutionFilename);
-                this.MSBuild(this.solutionFilename);
+                var target = Argument("target", "Default");
+                  Task("Restore-NuGet-Packages")
+                .Does(() => this.NuGetRestore(this.solutionFilename));
+
+                  Task("Core-build")
+                .IsDependentOn("Restore-NuGet-Packages")
+                .Does(() => this.MSBuild(this.solutionFilename));
+
+                  Task("Default")
+                  .IsDependentOn("Core-build");
+
+                  this.RunTarget(target);
             }
 
             #endregion Methods

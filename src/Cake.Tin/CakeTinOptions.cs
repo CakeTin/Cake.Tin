@@ -5,10 +5,6 @@
 // -----------------------------------------------------------------------
 namespace Cake.Tin
 {
-    using System.Collections.Generic;
-
-    using Cake.Core.Diagnostics;
-
     /// <summary>
     /// RunBuild options
     /// </summary>
@@ -29,6 +25,12 @@ namespace Cake.Tin
 
         #region Properties
 
+        /// <summary>
+        /// Gets or sets the cake options.
+        /// </summary>
+        /// <value>
+        /// The cake options.
+        /// </value>
         public CakeOptions CakeOptions { get; set; }
 
         #endregion Properties

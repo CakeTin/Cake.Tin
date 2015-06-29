@@ -8,6 +8,7 @@ namespace Cake.Tin
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
 
@@ -80,12 +81,13 @@ namespace Cake.Tin
         /// </summary>
         /// <param name="fileSystem">The file system.</param>
         /// <param name="environment">The environment.</param>
-        /// <param name="globber">The globber.</param>
+        /// <param name="globber">The Globber.</param>
         /// <param name="log">The log.</param>
         /// <param name="arguments">The arguments.</param>
         /// <param name="processRunner">The process runner.</param>
         /// <param name="toolResolvers">The tool resolvers.</param>
         /// <param name="registry">The registry.</param>
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         protected CakeTinBase(
             IFileSystem fileSystem,
             ICakeEnvironment environment,
@@ -122,18 +124,14 @@ namespace Cake.Tin
         /// <summary>
         /// Gets the globber.
         /// </summary>
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         public IGlobber Globber { get; private set; }
 
         /// <summary>
         /// Gets the log.
         /// </summary>
         public ICakeLog Log { get; private set; }
-
-        /// <summary>
-        /// Gets the options.
-        /// </summary>
-        public CakeTinOptions Options { get; private set; }
-
+        
         /// <summary>
         /// Gets the process runner.
         /// </summary>
@@ -147,6 +145,7 @@ namespace Cake.Tin
         /// <summary>
         /// Gets the AppVeyor class for interaction on that build system.
         /// </summary>
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         protected IAppVeyorProvider AppVeyor
         {
             get
@@ -191,34 +190,31 @@ namespace Cake.Tin
         /// <returns>True if build successful; otherwise false</returns>
         public bool Execute()
         {
-            try
-            {
-                // Parse options.
-                var argumentParser = Container.Resolve<IArgumentParser>();
-                var options = argumentParser.Parse(System.Environment.GetCommandLineArgs());
-                if (options != null)
-                {
-                    var log = this.Log as IVerbosityAwareLog;
-                    if (log != null)
-                    {
-                        log.SetVerbosity(options.Verbosity);
-                    }
+            return this.Execute(System.Environment.GetCommandLineArgs());
+        }
 
-                    // Create the correct command and execute it.
-                    var command = CreateCommand(options);
-                    return command.Execute(options);
-                }
-            }
-            catch (Exception ex)
+        /// <summary>
+        /// Executes this instance.
+        /// </summary>
+        /// <param name="arguments">The arguments.</param>
+        /// <returns>True if build successful; otherwise false</returns>
+        public bool Execute(IEnumerable<string> arguments)
+        {
+            // Parse options.
+            var argumentParser = this.Container.Resolve<IArgumentParser>();
+            var options = argumentParser.Parse(arguments);
+            if (options != null)
             {
-                if (this.Log.Verbosity == Verbosity.Diagnostic)
+                options.Script = options.Script ?? "Dummy";
+                var log = this.Log as IVerbosityAwareLog;
+                if (log != null)
                 {
-                    this.Log.Error("Error: {0}", ex);
+                    log.SetVerbosity(options.Verbosity);
                 }
-                else
-                {
-                    this.Log.Error("Error: {0}", ex.Message);
-                }
+
+                // Create the correct command and execute it.
+                var command = this.CreateCommand(options);
+                return command.Execute(options);
             }
 
             return false;
@@ -238,6 +234,7 @@ namespace Cake.Tin
             {
                 throw new CakeException(string.Format(CultureInfo.InvariantCulture, "Failed to resolve tool: {0}", toolName));
             }
+            
             return toolResolver;
         }
 
@@ -356,7 +353,7 @@ namespace Cake.Tin
             // Cake services.
             builder.RegisterType<ArgumentParser>().As<IArgumentParser>().SingleInstance();
             builder.RegisterType<CommandFactory>().As<ICommandFactory>().SingleInstance();
-            //builder.RegisterType<CakeApplication>().SingleInstance();
+            ////builder.RegisterType<CakeApplication>().SingleInstance();
             builder.RegisterType<ScriptRunner>().As<IScriptRunner>().SingleInstance();
             builder.RegisterType<CakeBuildLog>().As<ICakeLog>().As<IVerbosityAwareLog>().SingleInstance();
 
@@ -418,6 +415,18 @@ namespace Cake.Tin
             return new ErrorCommandDecorator(commandFactory.CreateHelpCommand());
         }
 
+        /// <summary>
+        /// Sets the properties.
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <param name="environment">The environment.</param>
+        /// <param name="globber">The globber.</param>
+        /// <param name="log">The log.</param>
+        /// <param name="arguments">The arguments.</param>
+        /// <param name="processRunner">The process runner.</param>
+        /// <param name="toolResolvers">The tool resolvers.</param>
+        /// <param name="registry">The registry.</param>
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
         private void SetProperties(
             IFileSystem fileSystem,
             ICakeEnvironment environment,
@@ -432,26 +441,32 @@ namespace Cake.Tin
             {
                 throw new ArgumentNullException("fileSystem");
             }
+
             if (environment == null)
             {
                 throw new ArgumentNullException("environment");
             }
+
             if (globber == null)
             {
                 throw new ArgumentNullException("globber");
             }
+
             if (log == null)
             {
                 throw new ArgumentNullException("log");
             }
+
             if (arguments == null)
             {
                 throw new ArgumentNullException("arguments");
             }
+
             if (processRunner == null)
             {
                 throw new ArgumentNullException("processRunner");
             }
+
             if (toolResolvers == null)
             {
                 throw new ArgumentNullException("toolResolvers");
