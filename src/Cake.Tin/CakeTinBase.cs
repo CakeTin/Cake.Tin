@@ -7,7 +7,6 @@ namespace Cake.Tin
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
@@ -38,6 +37,9 @@ namespace Cake.Tin
     public abstract class CakeTinBase : ICakeContext, IDisposable
     {
         #region Fields
+
+        /// <summary>the argument options</summary>
+        private ArgumentOptions argOptions;
 
         /// <summary>RunBuild script host</summary>
         private BuildScriptHost buildScriptHost;
@@ -131,7 +133,7 @@ namespace Cake.Tin
         /// Gets the log.
         /// </summary>
         public ICakeLog Log { get; private set; }
-        
+
         /// <summary>
         /// Gets the process runner.
         /// </summary>
@@ -157,7 +159,23 @@ namespace Cake.Tin
         /// <summary>
         /// Gets or sets the argument options.
         /// </summary>
-        protected ArgumentOptions ArgOptions { get; set; }
+        protected ArgumentOptions ArgOptions
+        {
+            get
+            {
+                return this.argOptions;
+            }
+
+            set
+            {
+                this.argOptions = value;
+                var arguments = this.Container.Resolve<ICakeArguments>() as CakeTinArguments;
+                if (arguments != null)
+                {
+                    arguments.ArgumentOptions = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the build system.
@@ -234,7 +252,7 @@ namespace Cake.Tin
             {
                 throw new CakeException(string.Format(CultureInfo.InvariantCulture, "Failed to resolve tool: {0}", toolName));
             }
-            
+
             return toolResolver;
         }
 
@@ -242,33 +260,6 @@ namespace Cake.Tin
         /// Creates and executes the build.
         /// </summary>
         protected internal abstract void CreateAndExecuteBuild();
-
-        /// <summary>
-        /// Arguments the specified name.
-        /// </summary>
-        /// <typeparam name="TReturn">The type of the return object.</typeparam>
-        /// <param name="name">The name.</param>
-        /// <param name="defaultValue">The default value.</param>
-        /// <returns>The value of the Argument if found, otherwise the default value</returns>
-        protected TReturn Argument<TReturn>(string name, TReturn defaultValue)
-        {
-            string value = null;
-
-            if ((this.ArgOptions & ArgumentOptions.CommandLine) == ArgumentOptions.CommandLine)
-            {
-                value = this.Arguments.GetArgument(name);
-            }
-
-            if (value == null
-            && (this.ArgOptions & ArgumentOptions.EnvironmentalVariables) == ArgumentOptions.EnvironmentalVariables)
-            {
-                value = this.EnvironmentVariable(name);
-            }
-
-            return value == null
-            ? defaultValue
-            : Convert<TReturn>(value);
-        }
 
         /// <summary>
         /// Runs the specified target.
@@ -310,18 +301,6 @@ namespace Cake.Tin
         }
 
         /// <summary>
-        /// Converts the specified value to the return type.
-        /// </summary>
-        /// <typeparam name="TReturn">The type of the return.</typeparam>
-        /// <param name="value">The value.</param>
-        /// <returns>Converted value</returns>
-        private static TReturn Convert<TReturn>(string value)
-        {
-            var converter = TypeDescriptor.GetConverter(typeof(TReturn));
-            return (TReturn)converter.ConvertFromInvariantString(value);
-        }
-
-        /// <summary>
         /// Creates the IoC container.
         /// </summary>
         /// <returns>Container instance</returns>
@@ -333,7 +312,7 @@ namespace Cake.Tin
             builder.RegisterType<CakeEngine>().As<ICakeEngine>().SingleInstance();
             builder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
             builder.RegisterType<CakeEnvironment>().As<ICakeEnvironment>().SingleInstance();
-            builder.RegisterType<CakeArguments>().As<ICakeArguments>().SingleInstance();
+            builder.RegisterType<CakeTinArguments>().As<ICakeArguments>().SingleInstance();
             builder.RegisterType<Globber>().As<IGlobber>().SingleInstance();
             builder.RegisterType<ProcessRunner>().As<IProcessRunner>().SingleInstance();
             builder.RegisterType<ScriptAliasFinder>().As<IScriptAliasFinder>().SingleInstance();
@@ -484,6 +463,11 @@ namespace Cake.Tin
 
             this.Registry = registry;
             this.buildScriptHost = new BuildScriptHost(this.Container.Resolve<ICakeEngine>(), this, this.Container.Resolve<ICakeReportPrinter>(), this.Log);
+            string workingFolder = this.Argument("workingFolder", string.Empty);
+            if (!string.IsNullOrEmpty(workingFolder))
+            {
+                this.Environment.WorkingDirectory = workingFolder;
+            }
         }
 
         #endregion Methods

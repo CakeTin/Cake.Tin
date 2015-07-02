@@ -8,6 +8,8 @@ namespace Cake.Tin
     using System;
     using System.Linq;
 
+    using Cake.Common;
+    using Cake.Common.Diagnostics;
     using Cake.Common.Tools.MSBuild;
     using Cake.Common.Tools.NuGet;
     using Cake.Core;
@@ -100,18 +102,20 @@ namespace Cake.Tin
             /// </summary>
             protected internal override void CreateAndExecuteBuild()
             {
-                var target = Argument("target", "Default");
-                  Task("Restore-NuGet-Packages")
-                .Does(() => this.NuGetRestore(this.solutionFilename));
+                var target = this.Argument("target", "Prebuild");
+                var configuration = this.Argument("configuration", "Release");
+                Task("Prebuild-Restore-NuGet-Packages")
+                 .Does(() => this.NuGetRestore(this.solutionFilename));
 
-                  Task("Core-build")
-                .IsDependentOn("Restore-NuGet-Packages")
-                .Does(() => this.MSBuild(this.solutionFilename));
+                Task("Prebuild-Core")
+                 .IsDependentOn("Prebuild-Restore-NuGet-Packages")
+                 .Does(() => this.MSBuild(this.solutionFilename, settings =>
+                    settings.SetConfiguration(configuration));
 
-                  Task("Default")
-                  .IsDependentOn("Core-build");
+                Task("Prebuild")
+                  .IsDependentOn("Prebuild-Core");
 
-                  this.RunTarget(target);
+                this.RunTarget(target);
             }
 
             #endregion Methods
