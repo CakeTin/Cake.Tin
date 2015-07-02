@@ -3,6 +3,9 @@
 //     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
 // </copyright>
 // -----------------------------------------------------------------------
+
+using Cake.Core.Diagnostics;
+
 namespace Cake.Tin.Commands
 {
     using System;
@@ -51,8 +54,11 @@ namespace Cake.Tin.Commands
             }
             catch (Exception ex)
             {
-                this.cakeTinBase.Error(ex.ToString());
-                return false;
+              this.cakeTinBase.Error(
+                this.cakeTinBase.Log.Verbosity == Verbosity.Diagnostic 
+                  ? ex.ToString()
+                  : ex.Message);
+              return false;
             }
         }
 
