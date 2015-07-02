@@ -9,7 +9,6 @@ namespace Cake.Tin
     using System.Linq;
 
     using Cake.Common;
-    using Cake.Common.Diagnostics;
     using Cake.Common.Tools.MSBuild;
     using Cake.Common.Tools.NuGet;
     using Cake.Core;
@@ -108,9 +107,8 @@ namespace Cake.Tin
                  .Does(() => this.NuGetRestore(this.solutionFilename));
 
                 Task("Prebuild-Core")
-                 .IsDependentOn("Prebuild-Restore-NuGet-Packages")
-                 .Does(() => this.MSBuild(this.solutionFilename, settings =>
-                    settings.SetConfiguration(configuration));
+                    .IsDependentOn("Prebuild-Restore-NuGet-Packages")
+                    .Does(() => this.MSBuild(this.solutionFilename, settings => settings.SetConfiguration(configuration)));
 
                 Task("Prebuild")
                   .IsDependentOn("Prebuild-Core");
