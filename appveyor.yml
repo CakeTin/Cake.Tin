@@ -1,7 +1,7 @@
 # Build script
 environment:
   gittoken:
-    secure: HOYIHgAVHoY4F66bKoo4VDAWjwAZzCioN726G6jHs6CNgxhMPKVxplPdhhdNa0Dx
+    secure: x6YxKDuSsTSAWxLt5H/M90M3K+zWin842d9AkUYMwTX1TpB65jHHVjAqd2VHmTqR
 
 init:
   - git config --global core.autocrlf true

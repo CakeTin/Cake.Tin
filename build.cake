@@ -241,10 +241,14 @@ RunTarget(target);
              RunGit("config --global user.name \"Mark Walker\"");
              RunGit("config --global core.autocrlf false");
              RunGit("config --global push.default simple");
-             string token = Argument("gittoken", "458dcfd1abb8dae1e4e19a27d68472cfb8940501");
-             string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
-             Information("Writing to " + credentialsStore);
-             System.IO.File.AppendAllText(credentialsStore, string.Format("https://{0}:x-oauth-basic@github.com\n", token)); 
+             if (AppVeyor.IsRunningOnAppVeyor)
+             {
+                 string token = Argument("gittoken", "");
+                 string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
+                 Information("Writing to " + credentialsStore);
+                 System.IO.File.AppendAllText(credentialsStore, string.Format("https://{0}:x-oauth-basic@github.com\n", token)); 
+             }
+             
              RunGit("add " + fileName);
              RunGit("commit -m\"Update release notes\"");
              RunGit("push");
