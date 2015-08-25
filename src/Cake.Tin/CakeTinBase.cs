@@ -161,20 +161,20 @@ namespace Cake.Tin
         /// </summary>
         protected ArgumentOptions ArgOptions
         {
-          get
-          {
-            return this.argOptions;
-          }
-
-          set
-          {
-            this.argOptions = value;
-            var arguments = this.Container.Resolve<ICakeArguments>() as CakeTinArguments;
-            if (arguments != null)
+            get
             {
-              arguments.ArgumentOptions = value;
+                return this.argOptions;
             }
-          }
+
+            set
+            {
+                this.argOptions = value;
+                var arguments = this.Container.Resolve<ICakeArguments>() as CakeTinArguments;
+                if (arguments != null)
+                {
+                    arguments.ArgumentOptions = value;
+                }
+            }
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace Cake.Tin
             {
                 throw new CakeException(string.Format(CultureInfo.InvariantCulture, "Failed to resolve tool: {0}", toolName));
             }
-            
+
             return toolResolver;
         }
 
@@ -260,8 +260,6 @@ namespace Cake.Tin
         /// Creates and executes the build.
         /// </summary>
         protected internal abstract void CreateAndExecuteBuild();
-
-        /// <summary>
         /// Runs the specified target.
         /// </summary>
         /// <param name="target">The target to run.</param>

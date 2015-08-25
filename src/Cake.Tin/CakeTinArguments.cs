@@ -45,7 +45,7 @@ namespace Cake.Tin
         /// </returns>
         public string GetArgument(string name)
         {
-             string value = null;
+            string value = null;
 
             if ((this.ArgumentOptions & ArgumentOptions.CommandLine) == ArgumentOptions.CommandLine)
             {
