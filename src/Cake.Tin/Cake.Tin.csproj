@@ -36,22 +36,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Cake, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Cake.0.4.2\Cake.exe</HintPath>
+      <HintPath>..\..\tools\Cake\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="Cake.Common, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Cake, Version=0.5.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Cake.0.4.2\Cake.Common.dll</HintPath>
+      <HintPath>..\..\tools\Cake\Cake.exe</HintPath>
     </Reference>
-    <Reference Include="Cake.Core, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Cake.Common, Version=0.5.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Cake.0.4.2\Cake.Core.dll</HintPath>
+      <HintPath>..\..\tools\Cake\Cake.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Cake.Core, Version=0.5.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\tools\Cake\Cake.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -61,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildCompiler.cs" />
+    <Compile Include="CakeTinArguments.cs" />
     <Compile Include="CakeTinBase.cs" />
     <Compile Include="CakeTinOptions.cs" />
     <Compile Include="Cake\Arguments\ArgumentParser.cs" />
@@ -89,7 +91,6 @@
       <Link>ReleaseNotes.md</Link>
     </None>
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -20,6 +20,9 @@ namespace Cake.Tin.Enums
 
         /// <summary>Allow arguments from Environmental Variables</summary>
         EnvironmentalVariables = 2,
+
+        /// <summary>Allow arguments from App.Config appSettings</summary>
+        ApplicationSettings = 4,
     }
 
     #endregion Enumerations

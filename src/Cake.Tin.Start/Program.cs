@@ -19,8 +19,8 @@ namespace Cake.Tin.Start
         /// </summary>
         public static void Main()
         {
-            Environment.SetEnvironmentVariable("NUGET_EXE", @"C:\GitHub\Cake.Tin\tools\nuget.exe");
-            BuildCompiler.Compile(@"C:\GitHub\Cake-Example\src\MyAwesomeApp.sln");
+            Environment.SetEnvironmentVariable("NUGET_EXE", @"C:\Repositories\c\cake\tools\nuget.exe");
+            BuildCompiler.Compile(@"C:\Repositories\c\Cake.Tin.Bootstrapper\Build\Build.sln", "-configuration=\"Release\"");
         }
 
         #endregion Methods

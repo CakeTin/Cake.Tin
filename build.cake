@@ -14,6 +14,8 @@ var local = BuildSystem.IsLocalBuild;
 var isRunningOnAppVeyor = AppVeyor.IsRunningOnAppVeyor;
 var isPullRequest = AppVeyor.Environment.PullRequest.IsPullRequest;
 
+EnsureCakeVersionInReleaseNotes();
+
 // Parse release notes.
 var releaseNotes = ParseReleaseNotes("./ReleaseNotes.md");
 
@@ -196,3 +198,35 @@ Task("AppVeyor")
 //////////////////////////////////////////////////////////////////////
 
 RunTarget(target);
+
+    private void EnsureCakeVersionInReleaseNotes()
+    {
+      const string fileName = "ReleaseNotes.md";
+      var releaseNotes = ParseReleaseNotes(fileName);
+      var cakeVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(@"tools\Cake\Cake.exe").FileVersion;
+      string cakeVersionNote = "Built against Cake v"; ;
+      var note = releaseNotes.Notes.FirstOrDefault(n => n.StartsWith(cakeVersionNote));
+      if (note == null)
+      {
+        // No cake version mentioned, add it
+        List<string> lines = System.IO.File.ReadAllLines(fileName).ToList();
+        int lineIndex = -1;
+        do
+        {
+          lineIndex++;
+        } while (lines[lineIndex].Trim() == String.Empty);
+        lines.Insert(lineIndex + 1, "* " + cakeVersionNote + cakeVersion);
+        System.IO.File.WriteAllLines(fileName, lines);
+      }
+      else if (!note.EndsWith(cakeVersion))
+      {
+        // Already released against an older version of Cake, add new release notes
+        Version version = releaseNotes.Version;
+        version = new Version(version.Major, version.Minor, version.Build + 1);
+        List<string> lines = System.IO.File.ReadAllLines(fileName).ToList();
+		lines.Insert(0, "");
+        lines.Insert(0, "* " + cakeVersionNote + cakeVersion);
+        lines.Insert(0, String.Format("### New in {0} (Released {1})", version.ToString(3), DateTime.Today.ToString("yyyy/MM/dd")));
+        System.IO.File.WriteAllLines(fileName, lines);
+      }
+    }
