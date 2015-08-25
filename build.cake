@@ -199,17 +199,17 @@ Task("AppVeyor")
 
 RunTarget(target);
 
-      private void EnsureCakeVersionInReleaseNotes()
+    private void EnsureCakeVersionInReleaseNotes()
+    {
+        bool updated = false;
+        List<string> lines = null;
+        const string fileName = "ReleaseNotes.md";
+        var releaseNotes = ParseReleaseNotes(fileName);
+        var cakeVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(@"tools\Cake\Cake.exe").FileVersion;
+        string cakeVersionNote = "Built against Cake v"; ;
+        var note = releaseNotes.Notes.FirstOrDefault(n => n.StartsWith(cakeVersionNote));
+        if (note == null)
         {
-          bool updated = false;
-          List<string> lines = null;
-          const string fileName = "ReleaseNotes.md";
-          var releaseNotes = ParseReleaseNotes(fileName);
-          var cakeVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(@"tools\Cake\Cake.exe").FileVersion;
-          string cakeVersionNote = "Built against Cake v"; ;
-          var note = releaseNotes.Notes.FirstOrDefault(n => n.StartsWith(cakeVersionNote));
-          if (note == null)
-          {
             // No cake version mentioned, add it
             lines = System.IO.File.ReadAllLines(fileName).ToList();
             int lineIndex = -1;
@@ -219,9 +219,9 @@ RunTarget(target);
             } while (lines[lineIndex].Trim() == String.Empty);
             lines.Insert(lineIndex + 1, "* " + cakeVersionNote + cakeVersion);
             updated = true;
-          }
-          else if (!note.EndsWith(cakeVersion))
-          {
+        }
+        else if (!note.EndsWith(cakeVersion))
+        {
             // Already released against an older version of Cake, add new release notes
             Version version = releaseNotes.Version;
             version = new Version(version.Major, version.Minor, version.Build + 1);
@@ -230,34 +230,35 @@ RunTarget(target);
             lines.Insert(0, "* " + cakeVersionNote + cakeVersion);
             lines.Insert(0, String.Format("### New in {0} (Released {1})", version.ToString(3), DateTime.Today.ToString("yyyy/MM/dd")));
             updated = true;
-          }
-
-          if (updated)
-          {
-             Information("Updating release notes");
-             System.IO.File.WriteAllLines(fileName, lines);
-             RunGit("config --global credential.helper store");
-             RunGit("config --global user.email \"mark@walkersretreat.co.nz\"");
-             RunGit("config --global user.name \"Mark Walker\"");
-             RunGit("config --global core.autocrlf false");
-             RunGit("config --global push.default simple");
-             if (AppVeyor.IsRunningOnAppVeyor)
-             {
-                 string token = Argument("gittoken", "");
-                 string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
-                 Information("Writing to " + credentialsStore);
-                 System.IO.File.AppendAllText(credentialsStore, string.Format("https://{0}:x-oauth-basic@github.com\n", token)); 
-             }
-             
-             RunGit("add " + fileName);
-             RunGit("commit -m\"Update release notes\"");
-             RunGit("push");
-          }
-          else
-          {
-             Information("Release notes up to date");
-          }
         }
+
+        if (updated)
+        {
+            Information("Updating release notes");
+            System.IO.File.WriteAllLines(fileName, lines);
+            RunGit("config --global credential.helper store");
+            RunGit("config --global user.email \"mark@walkersretreat.co.nz\"");
+            RunGit("config --global user.name \"Mark Walker\"");
+            RunGit("config --global core.autocrlf false");
+            RunGit("config --global push.default simple");
+            if (AppVeyor.IsRunningOnAppVeyor)
+            {
+                string token = Argument("gittoken", "");
+                string auth = string.Format("https://{0}:x-oauth-basic@github.com\n", token)
+                string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
+                Information("Writing {0} to {1}", auth, credentialsStore);
+                System.IO.File.AppendAllText(credentialsStore, auth); 
+            }
+
+            RunGit("add " + fileName);
+            RunGit("commit -m\"Update release notes\"");
+            RunGit("push");
+        }
+        else
+        {
+           Information("Release notes up to date");
+        }
+    }
 
         private void RunGit(string arguments)
         {
