@@ -237,6 +237,8 @@ RunTarget(target);
 			 Information("Updating release notes");
              System.IO.File.WriteAllLines(fileName, lines);
              RunGit("config --global credential.helper store");
+             RunGit("config --global user.email \"mark@walkersretreat.co.nz\"");
+             RunGit("config --global user.name \"Mark Walker\"");
              string token = Argument("gittoken", "458dcfd1abb8dae1e4e19a27d68472cfb8940501");
              string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
              System.IO.File.AppendAllText(credentialsStore,string.Format("https://{0}:x-oauth-basic@github.com\n", token)); 
