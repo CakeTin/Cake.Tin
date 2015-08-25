@@ -239,6 +239,7 @@ RunTarget(target);
              RunGit("config --global credential.helper store");
              RunGit("config --global user.email \"mark@walkersretreat.co.nz\"");
              RunGit("config --global user.name \"Mark Walker\"");
+             RunGit("config --global core.autocrlf false");
              string token = Argument("gittoken", "458dcfd1abb8dae1e4e19a27d68472cfb8940501");
              string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
              System.IO.File.AppendAllText(credentialsStore,string.Format("https://{0}:x-oauth-basic@github.com\n", token)); 
@@ -246,10 +247,10 @@ RunTarget(target);
              RunGit("commit -m\"Update release notes\"");
              RunGit("push");
           }
-		  else
-		  {
-			 Information("Release notes up to date");
-		  }
+          else
+          {
+             Information("Release notes up to date");
+          }
         }
 
         private void RunGit(string arguments)
