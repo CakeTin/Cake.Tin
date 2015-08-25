@@ -199,34 +199,75 @@ Task("AppVeyor")
 
 RunTarget(target);
 
-    private void EnsureCakeVersionInReleaseNotes()
-    {
-      const string fileName = "ReleaseNotes.md";
-      var releaseNotes = ParseReleaseNotes(fileName);
-      var cakeVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(@"tools\Cake\Cake.exe").FileVersion;
-      string cakeVersionNote = "Built against Cake v"; ;
-      var note = releaseNotes.Notes.FirstOrDefault(n => n.StartsWith(cakeVersionNote));
-      if (note == null)
-      {
-        // No cake version mentioned, add it
-        List<string> lines = System.IO.File.ReadAllLines(fileName).ToList();
-        int lineIndex = -1;
-        do
+      private void EnsureCakeVersionInReleaseNotes()
         {
-          lineIndex++;
-        } while (lines[lineIndex].Trim() == String.Empty);
-        lines.Insert(lineIndex + 1, "* " + cakeVersionNote + cakeVersion);
-        System.IO.File.WriteAllLines(fileName, lines);
-      }
-      else if (!note.EndsWith(cakeVersion))
-      {
-        // Already released against an older version of Cake, add new release notes
-        Version version = releaseNotes.Version;
-        version = new Version(version.Major, version.Minor, version.Build + 1);
-        List<string> lines = System.IO.File.ReadAllLines(fileName).ToList();
-		lines.Insert(0, "");
-        lines.Insert(0, "* " + cakeVersionNote + cakeVersion);
-        lines.Insert(0, String.Format("### New in {0} (Released {1})", version.ToString(3), DateTime.Today.ToString("yyyy/MM/dd")));
-        System.IO.File.WriteAllLines(fileName, lines);
-      }
-    }
+          bool updated = false;
+		  List<string> lines = null;
+          const string fileName = "ReleaseNotes.md";
+          var releaseNotes = ParseReleaseNotes(fileName);
+          var cakeVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(@"tools\Cake\Cake.exe").FileVersion;
+          string cakeVersionNote = "Built against Cake v"; ;
+          var note = releaseNotes.Notes.FirstOrDefault(n => n.StartsWith(cakeVersionNote));
+          if (note == null)
+          {
+            // No cake version mentioned, add it
+            lines = System.IO.File.ReadAllLines(fileName).ToList();
+            int lineIndex = -1;
+            do
+            {
+              lineIndex++;
+            } while (lines[lineIndex].Trim() == String.Empty);
+            lines.Insert(lineIndex + 1, "* " + cakeVersionNote + cakeVersion);
+            updated = true;
+          }
+          else if (!note.EndsWith(cakeVersion))
+          {
+            // Already released against an older version of Cake, add new release notes
+            Version version = releaseNotes.Version;
+            version = new Version(version.Major, version.Minor, version.Build + 1);
+            lines = System.IO.File.ReadAllLines(fileName).ToList();
+            lines.Insert(0, "");
+            lines.Insert(0, "* " + cakeVersionNote + cakeVersion);
+            lines.Insert(0, String.Format("### New in {0} (Released {1})", version.ToString(3), DateTime.Today.ToString("yyyy/MM/dd")));
+            updated = true;
+          }
+
+          if (updated)
+          {
+			 Information("Updating release notes");
+             System.IO.File.WriteAllLines(fileName, lines);
+             RunGit("config --global credential.helper store");
+             string token = Argument("gittoken", "458dcfd1abb8dae1e4e19a27d68472cfb8940501");
+             string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
+             System.IO.File.AppendAllText(credentialsStore,string.Format("https://{0}:x-oauth-basic@github.com\n", token)); 
+             RunGit("add " + fileName);
+             RunGit("commit -m\"Update release notes\"");
+             RunGit("push");
+          }
+		  else
+		  {
+			 Information("Release notes up to date");
+		  }
+        }
+
+        private void RunGit(string arguments)
+        {
+            IEnumerable<string> output;
+            var exitCode = StartProcess("git", new ProcessSettings
+            {
+              Arguments = arguments, 
+              Timeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds,
+              RedirectStandardOutput = true
+            }, out output);
+
+            foreach (var line in output)
+            {
+                Information(line);
+            }
+
+            if (exitCode != 0)
+            {
+                Information("Git returned {0}", exitCode);
+                throw new Exception("Git Error");
+            }
+        }
