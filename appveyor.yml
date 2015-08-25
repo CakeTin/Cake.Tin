@@ -1,4 +1,8 @@
 # Build script
+environment:
+  gittoken:
+    secure: HOYIHgAVHoY4F66bKoo4VDAWjwAZzCioN726G6jHs6CNgxhMPKVxplPdhhdNa0Dx
+
 init:
   - git config --global core.autocrlf true
 
