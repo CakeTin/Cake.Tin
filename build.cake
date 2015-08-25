@@ -246,7 +246,7 @@ RunTarget(target);
                 string token = System.Environment.GetEnvironmentVariable("gittoken");
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new Exception("gittoken variable not found")
+                    throw new Exception("gittoken variable not found");
                 }
                 
                 string auth = string.Format("https://{0}:x-oauth-basic@github.com\n", token);
