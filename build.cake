@@ -243,12 +243,17 @@ RunTarget(target);
             RunGit("config --global push.default simple");
             if (AppVeyor.IsRunningOnAppVeyor)
             {
-                string token = Argument("gittoken", "");
+                string token = System.Environment.GetEnvironmentVariable("gittoken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    throw new Exception("gittoken variable not found")
+                }
+                
                 string auth = string.Format("https://{0}:x-oauth-basic@github.com\n", token);
                 string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
-                Information("Writing {0} to {1}", auth, credentialsStore);
+                //Information("Writing {0} to {1}", auth, credentialsStore);
                 System.IO.File.AppendAllText(credentialsStore, auth);
-                Information("{0} now contains:\n{1}", credentialsStore, System.IO.File.ReadAllText(credentialsStore));
+                //Information("{0} now contains:\n{1}", credentialsStore, System.IO.File.ReadAllText(credentialsStore));
             }
 
             RunGit("add " + fileName);
