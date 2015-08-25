@@ -202,7 +202,7 @@ RunTarget(target);
       private void EnsureCakeVersionInReleaseNotes()
         {
           bool updated = false;
-		  List<string> lines = null;
+          List<string> lines = null;
           const string fileName = "ReleaseNotes.md";
           var releaseNotes = ParseReleaseNotes(fileName);
           var cakeVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(@"tools\Cake\Cake.exe").FileVersion;
@@ -234,15 +234,17 @@ RunTarget(target);
 
           if (updated)
           {
-			 Information("Updating release notes");
+             Information("Updating release notes");
              System.IO.File.WriteAllLines(fileName, lines);
              RunGit("config --global credential.helper store");
              RunGit("config --global user.email \"mark@walkersretreat.co.nz\"");
              RunGit("config --global user.name \"Mark Walker\"");
              RunGit("config --global core.autocrlf false");
+             RunGit("config --global push.default simple");
              string token = Argument("gittoken", "458dcfd1abb8dae1e4e19a27d68472cfb8940501");
              string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
-             System.IO.File.AppendAllText(credentialsStore,string.Format("https://{0}:x-oauth-basic@github.com\n", token)); 
+             Information("Writing to " + credentialsStore);
+             System.IO.File.AppendAllText(credentialsStore, string.Format("https://{0}:x-oauth-basic@github.com\n", token)); 
              RunGit("add " + fileName);
              RunGit("commit -m\"Update release notes\"");
              RunGit("push");
