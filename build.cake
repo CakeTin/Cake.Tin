@@ -244,7 +244,7 @@ RunTarget(target);
             if (AppVeyor.IsRunningOnAppVeyor)
             {
                 string token = Argument("gittoken", "");
-                string auth = string.Format("https://{0}:x-oauth-basic@github.com\n", token)
+                string auth = string.Format("https://{0}:x-oauth-basic@github.com\n", token);
                 string credentialsStore = System.Environment.ExpandEnvironmentVariables(@"%USERPROFILE%\.git-credentials");
                 Information("Writing {0} to {1}", auth, credentialsStore);
                 System.IO.File.AppendAllText(credentialsStore, auth);
