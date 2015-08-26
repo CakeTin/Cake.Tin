@@ -10,7 +10,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 // Get whether or not this is a local build.
-var local = BuildSystem.IsLocalBuild;
+var isLocalBuild = BuildSystem.IsLocalBuild;
 var isRunningOnAppVeyor = AppVeyor.IsRunningOnAppVeyor;
 var isPullRequest = AppVeyor.Environment.PullRequest.IsPullRequest;
 
@@ -22,14 +22,65 @@ var releaseNotes = ParseReleaseNotes("./ReleaseNotes.md");
 // Get version.
 var buildNumber = AppVeyor.Environment.Build.Number;
 var version = releaseNotes.Version.ToString();
-var semVersion = local ? version : (version + string.Concat("-build-", buildNumber));
-
 // Define directories.
 var buildDir = Directory("./src/Cake.Tin/bin") + Directory(configuration);
 var buildResultDir = Directory("./build") + Directory("v" + semVersion);
 var testResultsDir = buildResultDir + Directory("test-results");
 var nugetRoot = buildResultDir + Directory("nuget");
 var binDir = buildResultDir + Directory("bin");
+var semVersion = isLocalBuild ? version : (version + string.Concat("-build-", buildNumber));
+var assemblyInfo        = new AssemblyInfoSettings {
+                                Title                   = "Cake.Tin",
+                                Description             = "Cake Tin - a wrapper for Cake (C# Make)",
+                                Product                 = "Cake.Tin",
+                                Company                 = "Mark Walker",
+                                Version                 = version,
+                                FileVersion             = version,
+                                InformationalVersion    = semVersion,
+                                Copyright               = string.Format("Copyright © Mark Walker {0}. Requires Cake which is Copyright © Patrik Svensson, Mattias Karlsson and contributors", DateTime.Now.Year),
+                                CLSCompliant            = true
+                            };
+var nuspecFiles = new [] 
+{
+    new NuSpecContent {Source = "Cake.Tin.dll"},
+    new NuSpecContent {Source = "Cake.exe"},
+    new NuSpecContent {Source = "Cake.Core.dll"},
+    new NuSpecContent {Source = "Cake.Core.xml"},
+    new NuSpecContent {Source = "Cake.Common.dll"},
+    new NuSpecContent {Source = "Cake.Common.xml"},
+    new NuSpecContent {Source = "Autofac.dll"},
+    new NuSpecContent {Source = "Nuget.Core.dll"},
+    new NuSpecContent {Source = "LICENSE"},
+    new NuSpecContent {Source = "README.md"},
+    new NuSpecContent {Source = "ReleaseNotes.md"},
+};
+var nuGetPackSettings   = new NuGetPackSettings {
+                                Id                      = assemblyInfo.Product,
+                                Version                 = assemblyInfo.InformationalVersion,
+                                Title                   = assemblyInfo.Title,
+                                Authors                 = new[] {assemblyInfo.Company},
+                                Owners                  = new[] {assemblyInfo.Company},
+                                Description             = assemblyInfo.Description,
+                                Summary                 = "Cake wrapper that allows writing Cake 'scripts' in a Visual Studio project", 
+                                ProjectUrl              = new Uri("https://github.com/CakeTin/Cake.Tin"),
+                                IconUrl                 = new Uri("https://raw.githubusercontent.com/cake-build/graphics/master/png/cake-medium.png"),
+                                LicenseUrl              = new Uri("https://github.com/caketin/Cake.Tin/blob/master/LICENSE"),
+                                Copyright               = assemblyInfo.Copyright,
+                                ReleaseNotes            = releaseNotes.Notes.ToArray(),
+                                Tags                    = new [] {"Cake", "Script", "Build"},
+                                RequireLicenseAcceptance= false,        
+                                Symbols                 = false,
+                                NoPackageAnalysis       = true,
+                                Files                   = nuspecFiles,
+                                BasePath                = binDir, 
+                                OutputDirectory         = nugetRoot
+                            };
+
+///////////////////////////////////////////////////////////////////////////////
+// Output some information about the current build.
+///////////////////////////////////////////////////////////////////////////////
+var buildStartMessage = string.Format("Building version {0} of {1} ({2}).", version, assemblyInfo.Product, semVersion);
+Information(buildStartMessage);
 
 ///////////////////////////////////////////////////////////////////////////////
 // SETUP / TEARDOWN
@@ -68,13 +119,7 @@ Task("Patch-Assembly-Info")
     .Does(() =>
 {
     var file = "./src/SolutionInfo.cs";
-    CreateAssemblyInfo(file, new AssemblyInfoSettings {
-        Product = "Cake.Tin",
-        Version = version,
-        FileVersion = version,
-        InformationalVersion = semVersion,
-        Copyright = "Copyright (c) Patrik Svensson, Mattias Karlsson and contributors"
-    });
+    CreateAssemblyInfo(file, assemblyInfo);
 });
 
 Task("Build")
@@ -129,15 +174,12 @@ Task("Create-NuGet-Packages")
     .IsDependentOn("Copy-Files")
     .Does(() =>
 {
-    // Create Cake package.
-    NuGetPack("./nuspec/Cake.Tin.nuspec", new NuGetPackSettings {
-        Version = semVersion,
-        ReleaseNotes = releaseNotes.Notes.ToArray(),
-        BasePath = binDir,
-        OutputDirectory = nugetRoot,
-        Symbols = false,
-        NoPackageAnalysis = true
-    });
+    // Create Cake.Tin package.
+    if (!System.IO.Directory.Exists(nugetRoot))
+    {
+        CreateDirectory(nugetRoot);
+    }
+    NuGetPack("./nuspec/Cake.Tin.nuspec", nuGetPackSettings);
 });
 
 Task("Update-AppVeyor-Build-Number")
@@ -155,9 +197,9 @@ Task("Upload-AppVeyor-Artifacts")
     var artifact = buildResultDir + File("Cake-bin-v" + semVersion + ".zip");
     AppVeyor.UploadArtifact(artifact);
 });
-
+/*
 Task("Publish-MyGet")
-    .WithCriteria(() => !local)
+    .WithCriteria(() => !isLocalBuild)
     .WithCriteria(() => !isPullRequest)
     .Does(() =>
 {
@@ -176,7 +218,7 @@ Task("Publish-MyGet")
         ApiKey = apiKey
     });
 });
-
+*/
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
@@ -185,13 +227,32 @@ Task("Package")
     .IsDependentOn("Zip-Files")
     .IsDependentOn("Create-NuGet-Packages");
 
+Task("Publish-NuGet-Packages")
+    .IsDependentOn("Create-NuGet-Packages")
+    .WithCriteria(() => !isLocalBuild)
+    .WithCriteria(() => !isPullRequest) 
+    .Does(() =>
+{
+    var packages  = GetFiles("./nuget/*.nupkg");
+    foreach (var package in packages)
+    {
+        Information(string.Format("Found {0}", package));
+
+        // Push the package.
+        var apiKey = EnvironmentVariable("NUGET_API_KEY");
+        NuGetPush(package, new NuGetPushSettings {
+                Source = "https://www.nuget.org/api/v2/package",
+                ApiKey = apiKey
+            }); 
+    }
+}); 
 Task("Default")
     .IsDependentOn("Package");
 
 Task("AppVeyor")
     .IsDependentOn("Update-AppVeyor-Build-Number")
     .IsDependentOn("Upload-AppVeyor-Artifacts")
-    .IsDependentOn("Publish-MyGet");
+    .IsDependentOn("Publish-NuGet-Packages");
 
 //////////////////////////////////////////////////////////////////////
 // EXECUTION

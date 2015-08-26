@@ -1,3 +1,6 @@
+### New in 0.0.4 (Released 2015/08/26)
+* Automate push to Nuget
+
 ### New in 0.0.3 (Released 2015/08/25)
 * Built against Cake v0.5.2
 
