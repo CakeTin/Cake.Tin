@@ -239,7 +239,12 @@ Task("Publish-NuGet-Packages")
         Information(string.Format("Found {0}", package));
 
         // Push the package.
-        var apiKey = EnvironmentVariable("NUGET_API_KEY");
+        string apiKey = EnvironmentVariable("NUGET_API_KEY");
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            throw new Exception("NUGET_API_KEY variable not found");
+        }
+
         NuGetPush(package, new NuGetPushSettings {
                 Source = "https://www.nuget.org/api/v2/package",
                 ApiKey = apiKey
@@ -304,7 +309,7 @@ RunTarget(target);
             RunGit("config --global push.default simple");
             if (AppVeyor.IsRunningOnAppVeyor)
             {
-                string token = System.Environment.GetEnvironmentVariable("gittoken");
+                string token = EnvironmentVariable("gittoken");
                 if (string.IsNullOrEmpty(token))
                 {
                     throw new Exception("gittoken variable not found");
