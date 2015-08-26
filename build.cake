@@ -233,7 +233,7 @@ Task("Publish-NuGet-Packages")
     .WithCriteria(() => !isPullRequest) 
     .Does(() =>
 {
-    var packages  = GetFiles("./nuget/*.nupkg");
+    var packages  = GetFiles(nugetRoot + "/*.nupkg");
     foreach (var package in packages)
     {
         Information(string.Format("Found {0}", package));
