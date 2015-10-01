@@ -4,6 +4,9 @@
 
 var target = Argument("target", "Default");
 var configuration = Argument("configuration", "Release");
+var branchName = GetGitBranch();
+
+Information("Branch is '{0}'", branchName);
 
 //////////////////////////////////////////////////////////////////////
 // PREPARATION
@@ -28,7 +31,9 @@ var buildResultDir = Directory("./build") + Directory("v" + semVersion);
 var testResultsDir = buildResultDir + Directory("test-results");
 var nugetRoot = buildResultDir + Directory("nuget");
 var binDir = buildResultDir + Directory("bin");
-var semVersion = isLocalBuild ? version : (version + string.Concat("-build-", buildNumber));
+var isMasterBranch = branchName == "master";
+var semVersion = isLocalBuild || isMasterBranch ? version : (version + string.Concat("-pre-", buildNumber));
+
 var assemblyInfo        = new AssemblyInfoSettings {
                                 Title                   = "Cake.Tin",
                                 Description             = "Cake Tin - a wrapper for Cake (C# Make)",
@@ -37,7 +42,7 @@ var assemblyInfo        = new AssemblyInfoSettings {
                                 Version                 = version,
                                 FileVersion             = version,
                                 InformationalVersion    = semVersion,
-                                Copyright               = string.Format("Copyright © Mark Walker {0}. Requires Cake which is Copyright © Patrik Svensson, Mattias Karlsson and contributors", DateTime.Now.Year),
+                                Copyright               = string.Format("Copyright (c) Mark Walker {0}. Includes Cake which is Copyright (c) Patrik Svensson, Mattias Karlsson and contributors", DateTime.Now.Year),
                                 CLSCompliant            = true
                             };
 var nuspecFiles = new [] 
@@ -197,28 +202,7 @@ Task("Upload-AppVeyor-Artifacts")
     var artifact = buildResultDir + File("Cake-bin-v" + semVersion + ".zip");
     AppVeyor.UploadArtifact(artifact);
 });
-/*
-Task("Publish-MyGet")
-    .WithCriteria(() => !isLocalBuild)
-    .WithCriteria(() => !isPullRequest)
-    .Does(() =>
-{
-    // Resolve the API key.
-    var apiKey = EnvironmentVariable("MYGET_API_KEY");
-    if(string.IsNullOrEmpty(apiKey)) {
-        throw new InvalidOperationException("Could not resolve MyGet API key.");
-    }
 
-    // Get the path to the package.
-    var package = nugetRoot + File("Cake.Tin." + semVersion + ".nupkg");
-
-    // Push the package.
-    NuGetPush(package, new NuGetPushSettings {
-        Source = "https://www.myget.org/F/caketin/api/v2/package",
-        ApiKey = apiKey
-    });
-});
-*/
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
@@ -251,6 +235,7 @@ Task("Publish-NuGet-Packages")
             }); 
     }
 }); 
+
 Task("Default")
     .IsDependentOn("Package");
 
@@ -305,7 +290,6 @@ RunTarget(target);
             RunGit("config --global credential.helper store");
             RunGit("config --global user.email \"mark@walkersretreat.co.nz\"");
             RunGit("config --global user.name \"Mark Walker\"");
-            RunGit("config --global core.autocrlf false");
             RunGit("config --global push.default simple");
             if (AppVeyor.IsRunningOnAppVeyor)
             {
@@ -332,24 +316,49 @@ RunTarget(target);
         }
     }
 
-        private void RunGit(string arguments)
+    private IEnumerable<string> RunGit(string arguments, bool logOutput = true)
+    {
+        IEnumerable<string> output;
+        var exitCode = StartProcess("git", new ProcessSettings
         {
-            IEnumerable<string> output;
-            var exitCode = StartProcess("git", new ProcessSettings
-            {
-              Arguments = arguments, 
-              Timeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds,
-              RedirectStandardOutput = true
-            }, out output);
+          Arguments = arguments, 
+          Timeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds,
+          RedirectStandardOutput = true
+        }, out output);
 
+        output = output.ToList();
+        if (logOutput)
+        {
             foreach (var line in output)
             {
                 Information(line);
             }
-
-            if (exitCode != 0)
-            {
-                Information("Git returned {0}", exitCode);
-                throw new Exception("Git Error");
-            }
         }
+
+        if (exitCode != 0)
+        {
+            Information("Git returned {0}", exitCode);
+            throw new Exception("Git Error");
+        }
+        
+        return output;
+    }
+
+    private string GetGitBranch()
+    {
+        string branch  = null;
+        IEnumerable<string> output = RunGit("status", false);
+        string line = output.FirstOrDefault(s => s.Trim().StartsWith("On branch"));
+        if (line == null)
+        {
+            Information("Unable to determine Git Branch, number " );
+            foreach (var oline in output)
+            {
+                Information(oline);
+            }
+
+            throw new Exception("Unable to determine Git Branch");
+        }
+        
+        return line.Replace("On branch", string.Empty).Trim();
+    }
