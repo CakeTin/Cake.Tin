@@ -44,9 +44,6 @@ namespace Cake.Tin
         /// <summary>RunBuild script host</summary>
         private BuildScriptHost buildScriptHost;
 
-        /// <summary>Tool resolver lookup</summary>
-        private ILookup<string, IToolResolver> toolResolverLookup;
-
         #endregion Fields
 
         #region Constructors
@@ -73,7 +70,6 @@ namespace Cake.Tin
                 this.Container.Resolve<ICakeLog>(),
                 this.Container.Resolve<ICakeArguments>(),
                 this.Container.Resolve<IProcessRunner>(),
-                this.Container.Resolve<IEnumerable<IToolResolver>>(),
                 this.Container.Resolve<IRegistry>());
             this.ArgOptions = ArgumentOptions.CommandLine;
         }
@@ -97,10 +93,9 @@ namespace Cake.Tin
             ICakeLog log,
             ICakeArguments arguments,
             IProcessRunner processRunner,
-            IEnumerable<IToolResolver> toolResolvers,
             IRegistry registry)
         {
-            this.SetProperties(fileSystem, environment, globber, log, arguments, processRunner, toolResolvers, registry);
+            this.SetProperties(fileSystem, environment, globber, log, arguments, processRunner, registry);
             this.ArgOptions = ArgumentOptions.CommandLine;
         }
 
@@ -239,24 +234,6 @@ namespace Cake.Tin
         }
 
         /// <summary>
-        /// Gets resolver by tool name
-        /// </summary>
-        /// <param name="toolName">resolver tool name</param>
-        /// <returns>
-        /// IToolResolver for tool
-        /// </returns>
-        public IToolResolver GetToolResolver(string toolName)
-        {
-            var toolResolver = this.toolResolverLookup[toolName].FirstOrDefault();
-            if (toolResolver == null)
-            {
-                throw new CakeException(string.Format(CultureInfo.InvariantCulture, "Failed to resolve tool: {0}", toolName));
-            }
-
-            return toolResolver;
-        }
-
-        /// <summary>
         /// Creates and executes the build.
         /// </summary>
         protected internal abstract void CreateAndExecuteBuild();
@@ -317,8 +294,6 @@ namespace Cake.Tin
             builder.RegisterType<CakeReportPrinter>().As<ICakeReportPrinter>().SingleInstance();
             builder.RegisterType<CakeConsole>().As<IConsole>().SingleInstance();
             builder.RegisterType<ScriptProcessor>().As<IScriptProcessor>().SingleInstance();
-            builder.RegisterCollection<IToolResolver>("toolResolvers").As<IEnumerable<IToolResolver>>();
-            builder.RegisterType<NuGetToolResolver>().As<IToolResolver>().As<INuGetToolResolver>().SingleInstance().MemberOf("toolResolvers");
             builder.RegisterType<WindowsRegistry>().As<IRegistry>().SingleInstance();
             builder.RegisterType<CakeContext>().As<ICakeContext>().SingleInstance();
 
@@ -411,7 +386,6 @@ namespace Cake.Tin
             ICakeLog log,
             ICakeArguments arguments,
             IProcessRunner processRunner,
-            IEnumerable<IToolResolver> toolResolvers,
             IRegistry registry)
         {
             if (fileSystem == null)
@@ -444,20 +418,12 @@ namespace Cake.Tin
                 throw new ArgumentNullException("processRunner");
             }
 
-            if (toolResolvers == null)
-            {
-                throw new ArgumentNullException("toolResolvers");
-            }
-
             this.FileSystem = fileSystem;
             this.Environment = environment;
             this.Globber = globber;
             this.Log = log;
             this.Arguments = arguments;
             this.ProcessRunner = processRunner;
-
-            // Create the tool resolver lookup table.
-            this.toolResolverLookup = toolResolvers.ToLookup(key => key.Name, value => value, StringComparer.OrdinalIgnoreCase);
 
             this.Registry = registry;
             this.buildScriptHost = new BuildScriptHost(this.Container.Resolve<ICakeEngine>(), this, this.Container.Resolve<ICakeReportPrinter>(), this.Log);
