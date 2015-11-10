@@ -25,6 +25,16 @@ namespace Cake.Tin
 
         #endregion Fields
 
+        #region Constructors
+
+        internal CakeTinArguments()
+        {
+            this.ArgumentOptions = ArgumentOptions.ApplicationSettings | ArgumentOptions.CommandLine
+                                   | ArgumentOptions.EnvironmentalVariables;
+        }
+
+        #endregion Constructors
+
         #region Properties
 
         /// <summary>
@@ -45,6 +55,20 @@ namespace Cake.Tin
         /// </returns>
         public string GetArgument(string name)
         {
+            return this.GetArgument(name, null);
+        }
+
+        /// <summary>
+        /// Gets an argument.
+        /// </summary>
+        /// <param name="name">The argument name.</param>
+        /// <param name="defaultIfMissing"></param>
+        /// <returns>
+        /// The argument value.
+        /// </returns>
+        /// ReSharper disable once MethodOverloadWithOptionalParameter
+        public string GetArgument(string name, string defaultIfMissing = null)
+        {
             string value = null;
 
             if ((this.ArgumentOptions & ArgumentOptions.CommandLine) == ArgumentOptions.CommandLine)
@@ -62,7 +86,7 @@ namespace Cake.Tin
                 value = ConfigurationManager.AppSettings[name];
             }
 
-            return value;
+            return value ?? defaultIfMissing;
         }
 
         /// <summary>
@@ -99,6 +123,11 @@ namespace Cake.Tin
             }
 
             return false;
+        }
+
+        public void SetArgument(string name, string value)
+        {
+            this.arguments.Add(name, value);
         }
 
         /// <summary>

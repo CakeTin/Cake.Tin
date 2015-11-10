@@ -3,10 +3,9 @@
 //     Copyright (c) 2015, Mark Walker and contributors. Based on Cake - Copyright (c) 2014, Patrik Svensson and contributors.
 // </copyright>
 // -----------------------------------------------------------------------
-namespace Cake.Arguments
+namespace Cake.Tin
 {
     using System;
-    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Linq;
 
@@ -14,24 +13,23 @@ namespace Cake.Arguments
     using Cake.Core.Diagnostics;
     using Cake.Core.IO;
 
-    internal sealed class ArgumentParser : IArgumentParser
+    internal sealed class ArgumentParser
     {
         #region Fields
 
-        /// <summary>_default script name conventions</summary>
-        private readonly string[] _defaultScriptNameConventions = 
+        /// <summary>Default script name conventions</summary>
+        private readonly string[] defaultSolutionNames = 
         {
-            "build.cake",
-            "default.cake",
-            "bake.cake",
-            ".cakefile"
+            "build.sln",
+            "build/build.sln",
+            "build/Merlot.Aero.Build.sln",
         };
 
-        /// <summary>_file system</summary>
-        private readonly IFileSystem _fileSystem;
+        /// <summary>File system</summary>
+        private readonly IFileSystem fileSystem;
 
-        /// <summary>_log</summary>
-        private readonly ICakeLog _log;
+        /// <summary>Logger instance</summary>
+        private readonly ICakeLog log;
 
         #endregion Fields
 
@@ -39,22 +37,23 @@ namespace Cake.Arguments
 
         public ArgumentParser(ICakeLog log, IFileSystem fileSystem)
         {
-            _log = log;
-            _fileSystem = fileSystem;
+            this.log = log;
+            this.fileSystem = fileSystem;
         }
 
         #endregion Constructors
 
         #region Methods
 
-        public CakeOptions Parse(IEnumerable<string> args)
+        public CakeTinOptions Parse(string[] args)
         {
             if (args == null)
             {
-                throw new ArgumentNullException("args");
+                throw new ArgumentNullException(nameof(args));
             }
 
-            var options = new CakeOptions();
+            var options = new CakeTinOptions();
+            options.Arguments = new CakeTinArguments();
             var isParsingOptions = false;
 
             var arguments = args.ToList();
@@ -62,7 +61,11 @@ namespace Cake.Arguments
             // If we don't have any arguments, search for a default script.
             if (arguments.Count == 0)
             {
-                options.Script = GetDefaultScript();
+                options.SolutionPath = this.GetDefaultSolution(options.WorkingDirectory);
+                if (options.SolutionPath == null)
+                {
+                    throw new ArgumentException("No solution found to build.");
+                }
             }
 
             foreach (var arg in arguments)
@@ -73,14 +76,14 @@ namespace Cake.Arguments
                 {
                     if (IsOption(value))
                     {
-                        if (!ParseOption(value, options))
+                        if (!this.ParseOption(value, options))
                         {
                             return null;
                         }
                     }
                     else
                     {
-                        _log.Error("More than one build script specified.");
+                        this.log.Error("More than one solution specified?");
                         return null;
                     }
                 }
@@ -88,21 +91,21 @@ namespace Cake.Arguments
                 {
                     try
                     {
-                        // If they didn't provide a specific build script, search for a defualt.
+                        // If they didn't provide a specific build solution, search for a default.
                         if (IsOption(arg))
                         {
                             // Make sure we parse the option
-                            if (!ParseOption(value, options))
+                            if (!this.ParseOption(value, options))
                             {
                                 return null;
                             }
 
-                            options.Script = GetDefaultScript();
+                            options.SolutionPath = this.GetDefaultSolution(options.WorkingDirectory);
                             continue;
                         }
 
                         // Quoted?
-                        options.Script = new FilePath(value);
+                        options.SolutionPath = new FilePath(value);
                     }
                     finally
                     {
@@ -124,25 +127,32 @@ namespace Cake.Arguments
             return arg[0] == '-';
         }
 
-        private FilePath GetDefaultScript()
+        private FilePath GetDefaultSolution(DirectoryPath workingDirectory)
         {
-            _log.Verbose("Searching for default build script...");
+            this.log.Verbose("Searching for default build script...");
 
-            // Search for default cake scripts in order
-            foreach (var defaultScriptNameConvention in _defaultScriptNameConventions)
+            // Search for default build solutions in order
+            foreach (var solutionName in this.defaultSolutionNames)
             {
-                var currentFile = new FilePath(defaultScriptNameConvention);
-                var file = _fileSystem.GetFile(currentFile);
-                if (file != null && file.Exists)
+                var currentFile = new FilePath(solutionName);
+                var file = this.fileSystem.GetFile(currentFile);
+                if (!file.Exists)
                 {
-                    _log.Verbose("Found default build script: {0}", defaultScriptNameConvention);
+                    currentFile = new FilePath(workingDirectory.CombineWithFilePath(file.Path).FullPath);
+                    file = this.fileSystem.GetFile(currentFile);
+                }
+
+                if (file.Exists)
+                {
+                    this.log.Verbose("Found default build script: {0}", solutionName);
                     return currentFile;
                 }
             }
+
             return null;
         }
 
-        private bool ParseOption(string arg, CakeOptions options)
+        private bool ParseOption(string arg, CakeTinOptions options)
         {
             string name, value;
 
@@ -166,10 +176,10 @@ namespace Cake.Arguments
                 }
             }
 
-            return ParseOption(name, value, options);
+            return this.ParseOption(name, value, options);
         }
 
-        private bool ParseOption(string name, string value, CakeOptions options)
+        private bool ParseOption(string name, string value, CakeTinOptions options)
         {
             if (name.Equals("verbosity", StringComparison.OrdinalIgnoreCase)
                 || name.Equals("v", StringComparison.OrdinalIgnoreCase))
@@ -207,14 +217,19 @@ namespace Cake.Arguments
             {
                 options.ShowVersion = true;
             }
-
-            if (options.Arguments.ContainsKey(name))
+            if (name.Equals("workingdirectory", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("workingfolder", StringComparison.OrdinalIgnoreCase))
             {
-                _log.Error("Multiple arguments with the same name ({0}).", name);
+                options.WorkingDirectory = value;
+            }
+
+            if (options.Arguments.HasArgument(name))
+            {
+                this.log.Error("Multiple arguments with the same name ({0}).", name);
                 return false;
             }
 
-            options.Arguments.Add(name, value);
+            options.Arguments.SetArgument(name, value);
             return true;
         }
 

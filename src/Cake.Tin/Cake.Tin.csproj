@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{5E7AB980-CC5C-4002-A5DF-BE9E32D273AE}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Cake.Tin</RootNamespace>
     <AssemblyName>Cake.Tin</AssemblyName>
@@ -61,29 +61,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuildCompiler.cs" />
     <Compile Include="CakeTinArguments.cs" />
-    <Compile Include="CakeTinBase.cs" />
     <Compile Include="CakeTinOptions.cs" />
-    <Compile Include="Cake\Arguments\ArgumentParser.cs" />
-    <Compile Include="Cake\CakeArguments.cs" />
-    <Compile Include="Cake\CakeConsole.cs" />
-    <Compile Include="Cake\CakeReportPrinter.cs" />
-    <Compile Include="Cake\Commands\BuildCommand.cs" />
-    <Compile Include="Cake\Commands\CommandFactory.cs" />
-    <Compile Include="Cake\Commands\DescriptionCommand.cs" />
-    <Compile Include="Cake\Commands\DryRunCommand.cs" />
-    <Compile Include="Cake\Commands\ErrorCommandDecorator.cs" />
-    <Compile Include="Cake\Commands\HelpCommand.cs" />
-    <Compile Include="Cake\Diagnostics\CakeBuildLog.cs" />
-    <Compile Include="Cake\Diagnostics\ConsolePalette.cs" />
-    <Compile Include="Cake\Diagnostics\Formatting\FormatParser.cs" />
-    <Compile Include="Cake\Diagnostics\Formatting\FormatToken.cs" />
-    <Compile Include="Cake\Diagnostics\Formatting\LiteralToken.cs" />
-    <Compile Include="Cake\Diagnostics\Formatting\PropertyToken.cs" />
-    <Compile Include="Commands\TinBuildCommand.cs" />
-    <Compile Include="Commands\VersionCommand.cs" />
+    <Compile Include="ArgumentParser.cs" />
     <Compile Include="Enums\ArgumentOptions.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
