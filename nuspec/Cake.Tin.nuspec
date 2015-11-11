@@ -20,7 +20,7 @@
     <file src="Cake.Core.xml" />
     <file src="Cake.Common.dll" />
     <file src="Cake.Common.xml" />
-    <file src="Cake.Tin.dll" />
+    <file src="Cake.Tin.exe" />
     <file src="NuGet.Core.dll" />
     <file src="Autofac.dll" />
     <file src="LICENSE" />

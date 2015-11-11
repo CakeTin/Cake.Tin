@@ -47,7 +47,7 @@ var assemblyInfo        = new AssemblyInfoSettings {
                             };
 var nuspecFiles = new [] 
 {
-    new NuSpecContent {Source = "Cake.Tin.dll"},
+    new NuSpecContent {Source = "Cake.Tin.exe"},
     new NuSpecContent {Source = "Cake.exe"},
     new NuSpecContent {Source = "Cake.Core.dll"},
     new NuSpecContent {Source = "Cake.Core.xml"},
@@ -153,7 +153,7 @@ Task("Copy-Files")
     .IsDependentOn("Run-Unit-Tests")
     .Does(() =>
 {
-    CopyFileToDirectory(buildDir + File("Cake.Tin.dll"), binDir);
+    CopyFileToDirectory(buildDir + File("Cake.Tin.exe"), binDir);
     CopyFileToDirectory(buildDir + File("Cake.exe"), binDir);
     CopyFileToDirectory(buildDir + File("Cake.Core.dll"), binDir);
     CopyFileToDirectory(buildDir + File("Cake.Core.xml"), binDir);
