@@ -49,7 +49,7 @@ namespace Cake.Tin
         {
             if (args == null)
             {
-                throw new ArgumentNullException(nameof(args));
+                throw new ArgumentNullException("args");
             }
 
             var options = new CakeTinOptions();

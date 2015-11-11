@@ -1,3 +1,6 @@
+### New in 0.0.7 (Released 2015-11-11)
+* Built against Cake v0.6.0
+
 ### New in 0.0.6 (Released 2015-10-01)
 * Built against Cake v0.5.4
 
